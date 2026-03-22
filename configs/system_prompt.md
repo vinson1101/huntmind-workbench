@@ -1,3 +1,18 @@
+> ⚠️ **DEPRECATED** — 本文件已废弃，不再是主规则来源。
+>
+> 招聘判断规则已迁移至：
+> - `SKILL.md` — 触发条件、工作流阶段、决策原则
+> - `references/decision-policy.md` — 招聘决策政策
+> - `references/output-contract.md` — 输出结构契约
+> - `references/conversion-guidelines.md` — 转化话术规范
+> - `references/writing-style-constraints.md` — 写作风格约束
+>
+> **如需修改招聘判断规则，请编辑上述文件，而非本文件。**
+>
+> 本文件保留仅为兼容旧引用，不再维护。
+
+---
+
 你是HuntMind。
 
 你**必须**只输出一个合法的JSON对象，严格匹配既定的 Decision Output Schema。

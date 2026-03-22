@@ -199,3 +199,92 @@ TalentFlow 现在的目标不是“变成 AI 招聘员工”。
 **成为一个干净、可复用、专为招聘场景服务的 skill backend / pipeline。**
 
 而 AI 员工本体，始终应该是 HuntMind。
+
+---
+
+## 真实测试标准流程
+
+> 以下是 TalentFlow 的正确使用方式，对应真实的「一个 JD + 一批简历 + HuntMind 判断」闭环。
+
+### 前置准备
+
+1. **准备 JD 文件**（JSON 格式）：
+   ```bash
+   cat > ./jd.json << 'JD'
+   {
+     "title": "品牌战略总监",
+     "department": "战略部",
+     "location": "宁波",
+     "salary": "面议",
+     "requirements": [...],
+     "responsibilities": [...]
+   }
+   JD
+   ```
+
+2. **准备简历目录**（支持 pdf/docx/txt/md）：
+   ```
+   ./resumes/
+   ├── candidate_wang.pdf
+   ├── candidate_li.docx
+   └── candidate_zhang.txt
+   ```
+
+### 标准 Workflow（5步）
+
+```bash
+# Step A: TalentFlow 读取简历，生成 batch_input.json
+python pipelines/process_local_folder.py ./resumes --jd ./jd.json
+
+# → 产出：runs/run_xxx/batch_input.json
+#         runs/run_xxx/candidates/（标准化后的候选人文件）
+
+# Step B: HuntMind 读取 batch_input.json，自主做招聘判断
+#         产出 hunts/run_xxx/huntmind_output.json
+#         （由 HuntMind agent 自主完成，不经过 TalentFlow 调用模型）
+
+# Step C: TalentFlow 校验模型输出
+python scripts/validate_model_output.py runs/run_xxx/batch_input.json runs/run_xxx/huntmind_output.json
+
+# → 产出：runs/run_xxx/huntmind_output.json（清洗后）
+#         runs/run_xxx/validation_meta.json
+
+# Step D: TalentFlow 生成最终产物
+python scripts/finalize_report.py runs/run_xxx runs/run_xxx/huntmind_output.json
+
+# → 产出：runs/run_xxx/final_output.json
+#         runs/run_xxx/final_report.md
+#         runs/run_xxx/owner_summary.md
+
+# Step E: 质量门禁检查
+python scripts/quality_gate.py runs/run_xxx/final_output.json
+
+# → 产出：runs/run_xxx/quality_meta.json
+```
+
+### 查看运行记录
+
+所有运行产物统一在 `runs/run_xxx/` 目录下：
+
+```
+runs/run_xxx/
+├── batch_input.json         # Step A 产出
+├── candidates/               # 标准化候选人文件
+├── huntmind_output.json     # Step B 产出（HuntMind 填写）
+├── final_output.json        # Step D 产出
+├── final_report.md          # 最终报告（可读）
+├── owner_summary.md         # Owner 视图
+├── quality_meta.json        # Step E 产出
+└── run_meta.json          # 运行元数据
+```
+
+### 常见问题
+
+**Q: Step B 由谁完成？**
+A: HuntMind agent。TalentFlow 负责简历读取和后处理，不调用模型。
+
+**Q: batch_input.json 校验失败怎么办？**
+A: 检查 `runs/run_xxx/validation_errors.json`，修正输入后重新运行 Step A。
+
+**Q: 质量门禁不通过怎么办？**
+A: 查看 `runs/run_xxx/quality_meta.json` 中的失败原因，人工复核后可在 `quality_meta.json` 中设置 `manual_override: true` 强制通过。

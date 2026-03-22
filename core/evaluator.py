@@ -1,15 +1,19 @@
 """
-模型评估模块
+DEPRECATED — 此模块已废弃，不再是 TalentFlow 的主路径。
 
-功能：
-- 读取冻结的 system prompt
-- 调用真实模型接口执行 batch 评估
-- 返回模型原始输出文本
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  模型评估已从 TalentFlow 中移除。
+    TalentFlow 不再负责：模型选择、API key、base_url、prompt、LLM 调用。
+    HuntMind 是 AI 招聘员工本体，负责招聘判断。
+    TalentFlow 是 skill backend / pipeline。
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-注意：
-- 不在此模块中做 schema 修复
-- 不在此模块中做排序修复
-- 不在此模块中做报告渲染或文件落盘
+正确流程：
+    Step A) python pipelines/process_local_folder.py ...
+    Step B) HuntMind 读取 batch_input.json 自主判断
+    Step C) scripts/validate_model_output.py + finalize_report.py + quality_gate.py
+
+本模块代码已冻结，不再维护，仅为兼容旧引用保留。
 """
 
 from __future__ import annotations
