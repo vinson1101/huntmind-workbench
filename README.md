@@ -1,195 +1,165 @@
-# TalentFlow - 招聘决策流水线
+# TalentFlow - 招聘决策 Skill / Pipeline
 
-> 候选人流转与招聘决策自动化工具
-
----
-
-## 🎯 项目简介
-
-TalentFlow 是一个专业的招聘决策辅助系统，帮助HR和猎头快速评估候选人，提高决策效率和准确性。
-
-### 核心能力
-
-- 🔍 **多渠道简历摄入**：支持飞书、本地文件、钉钉（规划中）
-- 🤖 **AI智能评估**：基于职位需求自动分析候选人匹配度
-- 📊 **结构化输出**：生成决策报告、风险评估、面试建议
-- 🔄 **批量处理**：一次性评估多个候选人，自动排序
-- 📝 **多格式导出**：支持JSON、Markdown、飞书表格
+> HuntMind 驱动的招聘决策流水线，而不是独立 AI HR 本体
 
 ---
 
-## 📁 目录结构
+## 🎯 项目定位
 
-```
+TalentFlow 是 **HuntMind 的招聘决策流水线 / skill**，负责：
+
+- 多渠道简历摄入（飞书、本地目录等）
+- PDF / 文本解析与候选人标准化
+- batch_input 构建与 schema 校验
+- 调用外部 evaluator 完成候选人评估
+- 生成 final_output / final_report / owner_summary 等产物
+
+**TalentFlow 不是默认持有模型身份的 AI HR。**
+
+在产品主路径中：
+- **HuntMind** 是 AI native 招聘专员 / 决策主体
+- **TalentFlow** 是执行流水线 / skill
+- **招聘判断权默认属于 HuntMind，而不是 TalentFlow**
+
+---
+
+## 🧭 产品 / 工程边界
+
+### HuntMind 负责
+- 持有模型身份、persona、memory、策略
+- 组织 JD / 公司背景 / 招聘上下文
+- 注入 evaluator
+- 对外承担招聘决策主体身份
+
+### TalentFlow 负责
+- 文件扫描 / 下载 / 解析
+- schema 对齐与运行时校验
+- 批处理与产物落盘
+- 调用 evaluator 并衔接 runner / reporter
+
+### fallback evaluator 的定位
+TalentFlow 仍保留 fallback evaluator，但 **只允许用于**：
+- `local_dev`
+- `test`
+- `emergency_debug`
+
+它**不再是默认产品路径**，也不再代表 TalentFlow 是独立 AI HR。
+
+---
+
+## 📁 当前关键目录
+
+```text
 talentflow/
-├── configs/              # 配置文件
-│   ├── system_prompt.md   # AI提示词模板
-│   ├── input.schema.json  # 输入数据契约
-│   └── output.schema.json # 输出数据契约
-├── docs/                 # 文档
-│   └── candidate_ingestion_spec.md  # 简历摄入规范
-├── core/                 # 核心逻辑（平台无关）
-│   ├── resume_ingest.py   # 简历解析
-│   ├── runner.py          # 评估执行
-│   ├── candidate_store.py # 数据存储
-│   ├── batch_builder.py   # 批量输入构建
-│   └── final_reporter.py  # 报告生成
-├── adapters/             # 数据源适配器
-│   ├── feishu_adapter.py  # 飞书适配器
-│   ├── dingtalk_adapter.py # 钉钉适配器
-│   └── local_adapter.py   # 本地文件适配器
-├── pipelines/            # 处理流程入口
-│   ├── process_feishu_folder.py  # 飞书文件夹处理
-│   └── process_local_folder.py   # 本地文件夹处理
-├── runs/                 # 运行记录（中间产物）
-├── outputs/              # 最终输出（报告、表格）
-├── archive/              # 归档文件（实验代码）
-└── skills/               # Skill化（OpenClaw集成）
-    └── talentflow/
+├── adapters/
+├── configs/
+├── core/
+│   ├── batch_builder.py
+│   ├── candidate_store.py
+│   ├── evaluator.py              # fallback evaluator 实现
+│   ├── evaluator_resolver.py     # evaluator 解析与模式门控
+│   ├── final_reporter.py
+│   ├── resume_ingest.py
+│   ├── runner.py
+│   └── runtime.py                # RunMode / RuntimeContext
+├── entrypoints/
+│   ├── local_dev_entry.py        # 开发入口，允许 fallback
+│   └── skill_entry.py            # 产品入口，必须注入 evaluator
+├── pipelines/
+│   ├── process_feishu_folder.py
+│   └── process_local_folder.py
+└── skills/
 ```
 
 ---
 
-## 🚀 快速开始
+## 🚀 运行模式
 
-### 安装依赖
+TalentFlow 当前支持以下运行模式：
 
-```bash
-pip install -r requirements.txt
-```
+- `external`：产品主路径，**必须显式注入 evaluator**
+- `local_dev`：本地开发，允许 fallback evaluator
+- `test`：测试模式，允许 fallback evaluator
+- `emergency_debug`：应急排障，允许 fallback evaluator
 
-### 处理本地文件夹简历
+### 最重要的默认行为
+`process_local_folder(..., run_mode="external")` 是默认行为。
 
-```bash
-python pipelines/process_local_folder.py /path/to/resumes --jd jd.md
-```
-
-### 处理飞书文件夹简历
-
-```bash
-python pipelines/process_feishu_folder.py fldcnxxxxx --jd jd.md
-```
+这意味着：
+- 没有注入 evaluator 时，**不会再自动回退到 TalentFlow 自带 evaluator**
+- 只有显式进入 `local_dev/test/emergency_debug`，才允许 fallback
 
 ---
 
-## 📋 使用场景
+## ✅ 推荐用法
 
-### 场景1：批量评估本地简历
-
-```bash
-# 扫描 /data/resumes 文件夹下的所有PDF
-python pipelines/process_local_folder.py /data/resumes \
-    --jd company_jd.md \
-    --types pdf docx
-```
-
-### 场景2：从飞书云空间评估
-
-```bash
-# 处理飞书文件夹中的简历
-python pipelines/process_feishu_folder.py WWzZfxn8KlIlgWdAdB7cxurqnOc \
-    --jd company_jd.md
-```
-
-### 场景3：作为OpenClaw Skill使用
+### 1. 产品主路径：由 HuntMind 注入 evaluator
 
 ```python
-from skills.talentflow.entry import TalentFlowSkill
+from entrypoints.skill_entry import run_talentflow_skill
 
-skill = TalentFlowSkill()
-result = skill.process({
-    "source": "feishu",
-    "folder_token": "fldcnxxxxx",
-    "jd": "职位描述内容"
-})
+result = run_talentflow_skill(
+    folder_path="/data/resumes",
+    jd_data=jd_data,
+    evaluator=huntmind_evaluator,
+)
 ```
 
----
+### 2. 本地开发：显式使用开发入口
 
-## 🔧 配置说明
+```python
+from entrypoints.local_dev_entry import run_local_dev
 
-### 环境变量（可选）
+result = run_local_dev(
+    folder_path="/data/resumes",
+    jd_data=jd_data,
+)
+```
 
-创建 `.env` 文件：
+### 3. CLI：本地开发模式
 
 ```bash
-# 飞书配置（如果使用飞书适配器）
-FEISHU_APP_ID=cli_xxxxx
-FEISHU_APP_SECRET=xxxxx
-
-# AI模型配置（如果使用非默认模型）
-AI_MODEL=zhipu/glm-4.7
+python pipelines/process_local_folder.py /data/resumes \
+  --jd company_jd.json \
+  --run-mode local_dev
 ```
 
-### 配置文件
+---
 
-- **configs/system_prompt.md**：AI评估提示词模板
-- **configs/input.schema.json**：候选人输入数据结构
-- **configs/output.schema.json**：评估结果数据结构
+## 📊 run_meta 新增字段
+
+每次运行都会在 `run_meta.json` 中记录：
+
+- `run_mode`
+- `decision_owner`
+- `evaluator_source`
+- `model_identity`
+- `fallback_allowed`
+
+这样可以明确区分：
+- 这次是不是由 HuntMind 做判断
+- 这次是不是开发态 fallback 运行
+- 哪些结果可作为产品验证，哪些只适用于调试
 
 ---
 
-## 📊 输出格式
+## 📌 当前架构决策
 
-### 运行目录结构
-
-```
-runs/run_2026-03-22_180500/
-├── candidates/           # 候选人数据
-│   ├── cand_001.json
-│   ├── cand_001.md
-│   └── ...
-├── batch_input.json      # 批量输入
-├── final_output.json     # 最终输出
-├── final_report.md       # 最终报告
-└── run_meta.json         # 运行元数据
-```
-
-### 最终报告
-
-生成在 `outputs/` 目录，包含：
-- 候选人汇总统计
-- 详细评估结果
-- 决策建议
-- 面试问题
+1. **HuntMind 是唯一默认招聘决策主体**
+2. **TalentFlow 是招聘决策 skill / pipeline**
+3. **TalentFlow 保留 fallback evaluator，但仅限受控场景**
+4. **产品主路径必须外部注入 evaluator**
+5. **所有运行产物必须记录 decision owner 与 evaluator source**
 
 ---
 
-## 🎓 核心原则
+## 📝 状态
 
-TalentFlow 遵循以下设计原则：
-
-1. **决策优先**：每个候选人都必须给出明确决策（strong_yes/yes/maybe/no）
-2. **证据驱动**：每个判断必须引用简历中的具体信息
-3. **风险强制**：每个候选人必须输出1-3条风险分析
-4. **转化导向**：提供可执行的行动建议（话术、面试问题）
-5. **现实主义**：考虑薪资、稳定性、沟通难度等现实因素
+- 本地闭环：已跑通
+- 输出层：已完成一轮修复
+- 当前阶段：收敛产品边界，落实 HuntMind 接管默认决策权
 
 ---
 
-## 🔮 后续规划
-
-- [ ] 支持Word简历解析
-- [ ] 支持图片简历OCR
-- [ ] 钉钉适配器实现
-- [ ] 飞书表格自动录入
-- [ ] Web界面
-- [ ] API服务化
-
----
-
-## 📝 License
-
-MIT
-
----
-
-## 👥 贡献
-
-欢迎提交Issue和Pull Request！
-
----
-
-**创建时间**：2026年3月22日
-**版本**：v0.1.0
-**状态**：开发中
+**创建时间**：2026年3月22日  
+**当前方向**：从“可独立评估的工具”收敛为“HuntMind 驱动的招聘 skill”

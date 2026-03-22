@@ -5,7 +5,7 @@ Pipeline入口：
 1. 扫描本地或外部已下载好的临时目录
 2. 标准化读入简历
 3. 构建并校验符合 input schema 的 batch_input
-4. 调用评估函数并接入 runner 后处理
+4. 调用外部 evaluator（产品主路径）或受控 fallback evaluator（开发/测试路径）
 5. 保存可复盘的运行中间文件与最终产物
 """
 
@@ -24,10 +24,11 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from adapters.local_adapter import LocalAdapter
 from core.batch_builder import BatchBuilder
 from core.candidate_store import CandidateStore
-from core import evaluator as fallback_evaluator
+from core.evaluator_resolver import resolve_batch_evaluator
 from core.final_reporter import FinalReporter
 from core.resume_ingest import ingest_resume_files
 from core.runner import run as run_output_processing
+from core.runtime import RunMode
 
 
 DEFAULT_FILE_TYPES = ["pdf", "docx", "txt", "md"]
@@ -40,9 +41,13 @@ def process_local_folder(
     file_types: Optional[List[str]] = None,
     run_dir: Optional[Path] = None,
     evaluator: Optional[BatchEvaluator] = None,
+    run_mode: str = RunMode.EXTERNAL.value,
 ) -> Dict[str, Any]:
     """
     处理本地/临时目录中的简历文件并生成最小完整闭环产物。
+
+    默认 run_mode=external，表示产品主路径必须显式注入 evaluator。
+    只有 local_dev / test / emergency_debug 才允许使用 TalentFlow 自带 fallback evaluator。
     """
     if run_dir is None:
         from datetime import datetime
@@ -71,6 +76,15 @@ def process_local_folder(
             "failure_count": 0,
             "candidate_count": 0,
             "candidate_paths": [],
+            "run_mode": run_mode,
+            "decision_owner": "not_used",
+            "evaluator_source": "not_used",
+            "model_identity": None,
+            "fallback_allowed": run_mode in {
+                RunMode.LOCAL_DEV.value,
+                RunMode.TEST.value,
+                RunMode.EMERGENCY_DEBUG.value,
+            },
         }
         run_meta_path = batch_builder.save_run_metadata(run_metadata, run_dir)
         return {
@@ -91,6 +105,10 @@ def process_local_folder(
             "owner_summary_path": None,
         }
 
+    resolved = resolve_batch_evaluator(evaluator, run_mode=run_mode)
+    evaluate = resolved.evaluator
+    runtime_context = resolved.runtime_context
+
     resume_files = [_local_file_to_resume_file(file_obj) for file_obj in scan_result["files"]]
     ingest_result = ingest_resume_files(resume_files)
 
@@ -104,7 +122,6 @@ def process_local_folder(
     batch_input_path = batch_builder.save_batch_input(batch_input, run_dir)
     batch_builder.validate_saved_batch_input(batch_input_path)
 
-    evaluate = _resolve_batch_evaluator(evaluator)
     output_text = evaluate(batch_input)
     runner_result = run_output_processing(batch_input, output_text)
 
@@ -143,6 +160,11 @@ def process_local_folder(
             "final_report_path": str(final_report_path),
             "quality_meta_path": str(quality_meta_path),
             "owner_summary_path": str(owner_summary_path),
+            "run_mode": runtime_context.run_mode,
+            "decision_owner": runtime_context.decision_owner,
+            "evaluator_source": runtime_context.evaluator_source,
+            "model_identity": runtime_context.model_identity,
+            "fallback_allowed": runtime_context.fallback_allowed,
         },
     )
     run_meta_path = batch_builder.save_run_metadata(run_metadata, run_dir)
@@ -181,12 +203,6 @@ def _local_file_to_resume_file(file_obj: Any) -> Dict[str, Any]:
     }
 
 
-def _resolve_batch_evaluator(evaluator: Optional[BatchEvaluator]) -> BatchEvaluator:
-    if evaluator is not None:
-        return evaluator
-    return fallback_evaluator.evaluate_batch
-
-
 if __name__ == "__main__":
     import argparse
 
@@ -195,6 +211,12 @@ if __name__ == "__main__":
     parser.add_argument("--jd", required=True, help="职位描述 JSON 文件路径")
     parser.add_argument("--types", nargs="+", default=DEFAULT_FILE_TYPES, help="文件类型（默认: pdf docx txt md）")
     parser.add_argument("--run-dir", help="运行目录（可选）")
+    parser.add_argument(
+        "--run-mode",
+        default=RunMode.EXTERNAL.value,
+        choices=[mode.value for mode in RunMode],
+        help="运行模式：external/local_dev/test/emergency_debug（默认: external）",
+    )
 
     args = parser.parse_args()
 
@@ -207,6 +229,7 @@ if __name__ == "__main__":
         jd_data=jd_data,
         file_types=args.types,
         run_dir=Path(args.run_dir) if args.run_dir else None,
+        run_mode=args.run_mode,
     )
 
     print(
