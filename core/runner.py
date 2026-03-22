@@ -517,6 +517,24 @@ def _is_generic_message_template(message: str) -> bool:
     return any(pattern in text for pattern in generic_patterns)
 
 
+def _is_generic_core_judgement(text: str) -> bool:
+    cleaned = _clean_text(text)
+    if not cleaned:
+        return True
+    generic_patterns = (
+        "符合JD要求，建议联系",
+        "符合 JD 要求，建议联系",
+        "可作为备选",
+        "综合评分",
+    )
+    generic_hits = sum(1 for pattern in generic_patterns if pattern in cleaned)
+    if generic_hits >= 2:
+        return True
+    if "项目经理" in cleaned and "符合JD要求" in cleaned:
+        return True
+    return False
+
+
 def _normalize_score_breakdown(score_breakdown: Any, total_score: float) -> Dict[str, float]:
     if not isinstance(score_breakdown, dict):
         score_breakdown = {}
@@ -572,7 +590,7 @@ def _clean_core_judgement(candidate: Dict[str, Any], source_candidate: Optional[
             cleaned = cleaned.replace(current, candidate_name)
 
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
-    if not cleaned or _looks_like_composite_name(cleaned.split("，", 1)[0]):
+    if not cleaned or _looks_like_composite_name(cleaned.split("，", 1)[0]) or _is_generic_core_judgement(cleaned):
         temp_candidate = dict(candidate)
         if candidate_name:
             temp_candidate["candidate_name"] = candidate_name
@@ -637,6 +655,48 @@ def _sort_recommendations(candidates: List[Dict[str, Any]]) -> List[Dict[str, An
         candidate["rank"] = idx
 
     return sorted_candidates
+
+
+def _build_overall_diagnosis(candidates: List[Dict[str, Any]], input_data: Optional[Dict[str, Any]] = None) -> str:
+    source_candidates = (input_data or {}).get("candidates", [])
+    total_processed = len(source_candidates) if isinstance(source_candidates, list) and source_candidates else len(candidates)
+    successful_ingested = total_processed
+    recommended_count = len(candidates)
+    contact_count = sum(1 for candidate in candidates if candidate.get("decision") in {"strong_yes", "yes"})
+    maybe_count = sum(1 for candidate in candidates if candidate.get("decision") == "maybe")
+
+    role_counts: Dict[str, int] = {}
+    for candidate in candidates:
+        role_label = _extract_role_label(candidate)
+        if role_label:
+            role_counts[role_label] = role_counts.get(role_label, 0) + 1
+
+    role_mix = "、".join(role for role, _ in sorted(role_counts.items(), key=lambda item: (-item[1], item[0]))[:3])
+    role_part = f"候选人背景主要来自{role_mix}等相关方向。" if role_mix else ""
+
+    return (
+        f"本批共处理{total_processed}份简历，成功解析{successful_ingested}份，其中{recommended_count}份进入推荐池；"
+        f"值得联系{contact_count}人，备选观察{maybe_count}人。{role_part}"
+    ).strip()
+
+
+def _build_batch_advice(candidates: List[Dict[str, Any]]) -> str:
+    today_count = sum(1 for candidate in candidates if candidate.get("action_timing") == "today")
+    this_week_count = sum(1 for candidate in candidates if candidate.get("action_timing") == "this_week")
+    maybe_count = sum(1 for candidate in candidates if candidate.get("decision") == "maybe")
+
+    advice_parts: List[str] = []
+    if today_count:
+        advice_parts.append(f"建议优先推进 today 档的{today_count}位候选人")
+    if this_week_count:
+        advice_parts.append(f"本周完成 this_week 档的{this_week_count}位候选人初筛")
+    if maybe_count:
+        advice_parts.append(f"对{maybe_count}位备选候选人重点验证真实职责边界与产品 ownership")
+
+    if advice_parts:
+        return "；".join(advice_parts) + "。"
+
+    return "建议先完成推荐池候选人的首轮沟通，再根据验证结果决定是否继续推进。"
 
 
 # ==============================
@@ -789,6 +849,8 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
         sanitized.append(normalized_candidate)
 
     data["top_recommendations"] = _sort_recommendations(sanitized)
+    data["overall_diagnosis"] = _build_overall_diagnosis(data["top_recommendations"], input_data=input_data)
+    data["batch_advice"] = _build_batch_advice(data["top_recommendations"])
     return data
 
 
