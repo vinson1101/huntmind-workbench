@@ -27,6 +27,9 @@ NAME_LABEL_PATTERNS = [
     re.compile(r"(?:^|\n)\s*(?:Name|NAME|name)\s*[:：]?\s*([^\n]{1,40})"),
     re.compile(r"(?:^|\n)\s*(?:候选人|应聘者)\s*[:：]?\s*([^\n]{1,40})"),
 ]
+CONTACT_CONTEXT_PATTERN = re.compile(
+    r"(?:手机|电话|邮箱|微信|男|女|年龄|出生|现居|居住地|住址|地址|求职意向|应聘岗位|应聘职位|@|(?:\+?86)?1[3-9]\d{9})"
+)
 NAME_STOPWORDS = {
     "个人简历",
     "简历",
@@ -266,9 +269,17 @@ def _extract_name(file_name: str, raw_resume: str) -> Tuple[str, str]:
     if explicit_content_name:
         return explicit_content_name, "resume_content_explicit"
 
+    supported_header_name = _extract_supported_header_name_from_resume(raw_resume)
     file_name_name = _extract_name_from_file_name(file_name)
+
+    if supported_header_name and supported_header_name != file_name_name:
+        return supported_header_name, "resume_header_supported"
+
     if file_name_name:
         return file_name_name, "file_name_fallback"
+
+    if supported_header_name:
+        return supported_header_name, "resume_header_supported"
 
     first_line = next((line.strip() for line in raw_resume.splitlines() if line.strip()), "")
     first_line = _sanitize_name_candidate(first_line[:50])
@@ -293,6 +304,34 @@ def _extract_explicit_name_from_resume(raw_resume: str) -> Optional[str]:
                     return candidate
 
     return None
+
+
+def _extract_supported_header_name_from_resume(raw_resume: str) -> Optional[str]:
+    lines = [_normalize_line(line) for line in raw_resume.splitlines()]
+    lines = [line for line in lines if line][:12]
+    if not lines:
+        return None
+
+    for index, line in enumerate(lines[:8]):
+        for candidate in _candidate_name_tokens_from_line(line):
+            if not _looks_like_high_confidence_name(candidate):
+                continue
+            if _has_header_support(lines, index, candidate):
+                return candidate
+    return None
+
+
+def _has_header_support(lines: List[str], index: int, candidate: str) -> bool:
+    line = lines[index]
+    remainder = line.replace(candidate, " ", 1)
+    if CONTACT_CONTEXT_PATTERN.search(remainder):
+        return True
+
+    window = lines[index + 1 : min(len(lines), index + 3)]
+    if any(CONTACT_CONTEXT_PATTERN.search(item) for item in window):
+        return True
+
+    return len(line) <= 8 and index + 1 < len(lines) and bool(CONTACT_CONTEXT_PATTERN.search(lines[index + 1]))
 
 
 def _extract_name_from_file_name(file_name: str) -> Optional[str]:
