@@ -240,51 +240,60 @@ python pipelines/process_local_folder.py ./resumes --jd ./jd.json
 #         runs/run_xxx/candidates/（标准化后的候选人文件）
 
 # Step B: HuntMind 读取 batch_input.json，自主做招聘判断
-#         产出 hunts/run_xxx/huntmind_output.json
-#         （由 HuntMind agent 自主完成，不经过 TalentFlow 调用模型）
+#         HuntMind agent 自主完成判断，将结果写入 runs/run_xxx/huntmind_output.json
+#         TalentFlow 不调用模型，不写这个文件
 
-# Step C: TalentFlow 校验模型输出
-python scripts/validate_model_output.py runs/run_xxx/batch_input.json runs/run_xxx/huntmind_output.json
+# Step C: TalentFlow 校验并清洗模型输出
+python scripts/validate_model_output.py \
+    runs/run_xxx/batch_input.json \
+    runs/run_xxx/huntmind_output.json \
+    --write-final-output runs/run_xxx/final_output.json
 
-# → 产出：runs/run_xxx/huntmind_output.json（清洗后）
-#         runs/run_xxx/validation_meta.json
+# 可选：同时产出质量元数据
+python scripts/validate_model_output.py \
+    runs/run_xxx/batch_input.json \
+    runs/run_xxx/huntmind_output.json \
+    --write-final-output runs/run_xxx/final_output.json \
+    --writequality-meta runs/run_xxx/quality_meta.json
 
-# Step D: TalentFlow 生成最终产物
+# Step D: TalentFlow 生成最终报告
 python scripts/finalize_report.py runs/run_xxx runs/run_xxx/huntmind_output.json
 
 # → 产出：runs/run_xxx/final_output.json
-#         runs/run_xxx/final_report.md
-#         runs/run_xxx/owner_summary.md
+#              runs/run_xxx/final_report.md
+#              runs/run_xxx/owner_summary.md
 
-# Step E: 质量门禁检查
+# Step E: 质量门禁检查（只读，不写文件）
 python scripts/quality_gate.py runs/run_xxx/final_output.json
 
-# → 产出：runs/run_xxx/quality_meta.json
+# 退出码 0 = 通过，1 = 未通过（质量分 < 阈值 或 quality_flag = invalid）
+# 默认阈值 70，可通过 --min-score 调整
 ```
 
-### 查看运行记录
-
-所有运行产物统一在 `runs/run_xxx/` 目录下：
+### 运行产物
 
 ```
 runs/run_xxx/
-├── batch_input.json         # Step A 产出
-├── candidates/               # 标准化候选人文件
-├── huntmind_output.json     # Step B 产出（HuntMind 填写）
-├── final_output.json        # Step D 产出
-├── final_report.md          # 最终报告（可读）
-├── owner_summary.md         # Owner 视图
-├── quality_meta.json        # Step E 产出
-└── run_meta.json          # 运行元数据
+├── batch_input.json         # Step A 产出（TalentFlow 写入）
+├── candidates/              # Step A 产出（标准化候选人文件）
+├── huntmind_output.json     # Step B 产出（HuntMind agent 写入）
+├── final_output.json        # Step C 产出（需加 --write-final-output）
+├── final_report.md          # Step D 产出（可读报告）
+├── owner_summary.md         # Step D 产出（Owner 视图）
+├── quality_meta.json        # Step C 可选产出（需加 --writequality-meta）
+└── run_meta.json            # Step A 产出（运行元数据）
 ```
 
 ### 常见问题
 
 **Q: Step B 由谁完成？**
-A: HuntMind agent。TalentFlow 负责简历读取和后处理，不调用模型。
+A: HuntMind agent。TalentFlow 负责简历读取和后处理，不调用模型。HuntMind 将结果写入 `huntmind_output.json`。
 
-**Q: batch_input.json 校验失败怎么办？**
-A: 检查 `runs/run_xxx/validation_errors.json`，修正输入后重新运行 Step A。
+**Q: 质量门禁不通过（退出码1）怎么办？**
+A: 检查输出的 `quality` 字段，定位具体失败原因。可调整 `--min-score` 阈值，或在 `final_output.json` 中修正数据后重新检查。
 
-**Q: 质量门禁不通过怎么办？**
-A: 查看 `runs/run_xxx/quality_meta.json` 中的失败原因，人工复核后可在 `quality_meta.json` 中设置 `manual_override: true` 强制通过。
+**Q: --writequality-meta 是什么？**
+A: 可选参数。带上时会在指定路径写入 `quality_meta.json`，不带则只输出到 stdout。
+
+**Q: talentflow 支持传入 API key 让它自己调模型吗？**
+A: 不支持。TalentFlow 是 skill backend，不持有模型配置，不调用 LLM。所有模型调用由外部 HuntMind agent 负责。
