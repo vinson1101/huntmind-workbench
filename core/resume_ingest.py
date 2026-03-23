@@ -279,35 +279,43 @@ def _normalize_resume_text(raw_text: str) -> Tuple[str, bool]:
 
 
 def _extract_name(file_name: str, raw_resume: str) -> Tuple[str, str]:
-    explicit_content_name = _extract_explicit_name_from_resume(raw_resume)
-    if explicit_content_name:
-        return explicit_content_name, "resume_content_explicit"
+    """
+    优先从简历内容提取姓名，失败则用文件名。
 
-    supported_header_name = _extract_supported_header_name_from_resume(raw_resume)
-    file_name_name = _extract_name_from_file_name(file_name)
+    简历内容提取顺序：
+      1. 显式标签  "姓名：xxx" / "姓 名：xxx"
+      2. 混合第一行  "孙铜（男，1987..."
+      3. Header 姓名（需上下文支持）
+      4. 独立姓名行（扫描前40行，过滤关键词）
 
-    if supported_header_name and supported_header_name != file_name_name:
-        return supported_header_name, "resume_header_supported"
+    文件名 fallback：提取主体并清理分隔符。
+    """
+    # --- 层级1：简历内容（优先级递减）---
 
-    if file_name_name:
-        return file_name_name, "file_name_fallback"
+    # 1. 显式 "姓名：xxx"
+    name = _extract_explicit_name_from_resume(raw_resume)
+    if name:
+        return name, "resume_explicit"
 
-    if supported_header_name:
-        return supported_header_name, "resume_header_supported"
+    # 2. 混合第一行 "孙铜（男..."
+    name = _extract_name_from_mixed_first_line(raw_resume)
+    if name:
+        return name, "resume_mixed"
 
-    first_line = next((line.strip() for line in raw_resume.splitlines() if line.strip()), "")
-    first_line = _sanitize_name_candidate(first_line[:50])
-    if _looks_like_high_confidence_name(first_line):
-        return first_line, "first_line_fallback"
+    # 3. Header 姓名（简历前8行，需上下文支持）
+    name = _extract_supported_header_name_from_resume(raw_resume)
+    if name:
+        return name, "resume_header"
 
-    # 最后手段：使用整个文件名（不做验证），避免返回"未知候选人"
-    stem = Path(file_name).stem.strip()
-    if stem:
-        # 尝试清理但保留基本可读性
-        cleaned = re.sub(r"[_\-]+", " ", stem)
-        cleaned = re.sub(r"\s+", " ", cleaned).strip()
-        if cleaned and cleaned not in NAME_STOPWORDS:
-            return cleaned, "filename_last_resort"
+    # 4. 独立姓名行（扫描前40行，排除教育/工作/联系方式等关键词）
+    name = _extract_standalone_name_line(raw_resume)
+    if name:
+        return name, "resume_standalone"
+
+    # --- 层级2：文件名 fallback ---
+    name = _extract_name_from_file_name(file_name)
+    if name:
+        return name, "file_name"
 
     return "未知候选人", "unknown"
 
@@ -359,6 +367,43 @@ def _has_header_support(lines: List[str], index: int, candidate: str) -> bool:
         return True
 
     return len(line) <= 8 and index + 1 < len(lines) and bool(CONTACT_CONTEXT_PATTERN.search(lines[index + 1]))
+
+
+def _extract_name_from_mixed_first_line(raw_resume: str) -> Optional[str]:
+    """
+    匹配简历第一行中的"姓名（性别/年龄）"混合模式。
+    例如："孙铜（男，1987 年 3 月，33 岁）"
+    """
+    first_line = raw_resume.split("\n", 1)[0].strip()
+    if not first_line:
+        return None
+    # "孙铜（男..." -> "孙铜"
+    m = re.match(r"^([\u4e00-\u9fff·]{2,4})[（(]", first_line)
+    if m and _looks_like_high_confidence_name(m.group(1)):
+        return m.group(1)
+    return None
+
+
+def _extract_standalone_name_line(raw_resume: str) -> Optional[str]:
+    """
+    扫描简历前 40 行，找第一个独立姓名行（无联系方式/教育/工作等关键词）。
+    例如：张念简历末尾单独一行的"姜月"。
+    """
+    lines = [l.strip() for l in raw_resume.split("\n") if l.strip()][:40]
+    SKIP = (
+        "学院", "大学", "学校", "医院", "公司", "简历", "求职", "应聘",
+        "岗位", "职位", "邮箱", "电话", "手机", "微信", "地址",
+        "经验", "项目", "产品", "负责", "开发", "设计", "工程",
+        "经理", "工作", "经历", "描述", "年薪", "薪资", "期望",
+    )
+    for line in lines:
+        if CONTACT_CONTEXT_PATTERN.search(line):
+            continue
+        if any(kw in line for kw in SKIP):
+            continue
+        if re.match(r"^[\u4e00-\u9fff]{2,4}$", line) and _looks_like_high_confidence_name(line):
+            return line
+    return None
 
 
 def _extract_name_from_file_name(file_name: str) -> Optional[str]:
