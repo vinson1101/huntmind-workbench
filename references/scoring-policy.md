@@ -155,3 +155,11 @@ HuntMind 输出的 `structured_score` 必须包含：
 - 脚本不得修改 `dimension_scores` 的原始值（只用来算加权总分）
 - `score_breakdown` 不再是主评分真相，仅为 legacy 兼容层
 - 模型不得省略 `structured_score` 任意维度（缺失由脚本补 0，不抛错）
+
+### rank / total_score 占位策略
+- 模型继续输出 `rank` 和 `total_score` 作为**占位值**
+- runner 在 sanitize 阶段执行：
+  - **`total_score` 由脚本重算的 `weighted_total` 完全覆盖**，模型原始值不参与最终计算
+  - **`rank` 由 runner 按重算后的 `total_score` 降序重新排列**（1=最高分）
+- validate 阶段**不**因 rank/total_score 占位而报错，脚本负责最终收敛
+- 后续可演进为：模型不输出 rank/total_score，runner 完全接管

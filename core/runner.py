@@ -923,6 +923,27 @@ def _load_scoring_templates() -> Dict[str, Any]:
     return _TEMPLATES_CACHE
 
 
+def _get_jd_text(input_data: Dict[str, Any]) -> str:
+    """兼容读取 JD 文本，支持 input_data["jd"] 或 input_data["job_description"]。"""
+    if not isinstance(input_data, dict):
+        return ""
+    # 优先读 jd key，否则读 job_description
+    jd = input_data.get("jd") or input_data.get("job_description") or {}
+    if isinstance(jd, dict):
+        return _clean_text(jd.get("title", "")) + " " + _clean_text(jd.get("description", ""))
+    elif isinstance(jd, str):
+        return jd
+    return ""
+
+
+def _get_company_context(input_data: Dict[str, Any]) -> str:
+    """兼容读取 company_context。"""
+    if not isinstance(input_data, dict):
+        return ""
+    cc = input_data.get("company_context", "")
+    return _clean_text(cc) if isinstance(cc, str) else ""
+
+
 def _select_scoring_template(
     candidate: Dict[str, Any],
     source_candidate: Dict[str, Any],
@@ -935,25 +956,15 @@ def _select_scoring_template(
     templates_cfg = _load_scoring_templates()
     selection_rules = templates_cfg.get("template_selection", [])
 
-    # 尝试从 input_data 提取 JD title
-    job_description = ""
-    if isinstance(input_data, dict):
-        jd = input_data.get("job_description", {})
-        if isinstance(jd, dict):
-            job_description = _clean_text(jd.get("title", ""))
-        elif isinstance(jd, str):
-            job_description = jd
-
-    # 提取候选人角色
+    jd_text = _get_jd_text(input_data)
     candidate_role = _extract_role_label(candidate, source_candidate)
 
-    # 遍历选择规则
     for rule in selection_rules:
         when = rule.get("when", {})
         jd_keywords = when.get("jd_title_contains_any", [])
         role_keywords = when.get("candidate_role_contains_any", [])
 
-        if jd_keywords and any(kw in job_description for kw in jd_keywords):
+        if jd_keywords and any(kw in jd_text for kw in jd_keywords):
             return rule["use"]
         if role_keywords and any(kw in candidate_role for kw in role_keywords):
             return rule["use"]
@@ -968,20 +979,13 @@ def _infer_industry_adjustments(
 ) -> Dict[str, int]:
     """
     轻量行业修正。
-    目前检测 JD/company_context 中是否出现医疗相关关键词。
+    检测 JD/company_context 中是否出现医疗相关关键词。
     """
     adjustments: Dict[str, int] = {}
     if not isinstance(input_data, dict):
         return adjustments
 
-    jd = input_data.get("job_description", {})
-    context = input_data.get("company_context", "")
-    combined = ""
-    if isinstance(jd, dict):
-        combined = _clean_text(jd.get("title", "")) + " " + _clean_text(jd.get("description", ""))
-    elif isinstance(jd, str):
-        combined = jd
-    combined += " " + _clean_text(context)
+    combined = _get_jd_text(input_data) + " " + _get_company_context(input_data)
 
     healthcare_keywords = ["医疗", "健康", "医院", "互联网医疗", "区域健康", "biotech", "healthcare"]
     if any(kw.lower() in combined.lower() for kw in healthcare_keywords):
@@ -1051,6 +1055,40 @@ def _compute_weighted_total(
     norm = _normalize_weights(weights)
     total = sum(dimension_scores.get(dim, 0) * norm[dim] / 100 for dim in DIMENSIONS_7)
     return round(total, 2)
+
+
+def _apply_template_gates(
+    structured_score: Dict[str, Any],
+    template_id: str,
+) -> str:
+    """
+    根据模板 gate 规则决定最终 priority。
+    返回 "A" 或 "B"（不会降为 C，保留模型原始 C）。
+    模型原始 priority 仅供参考，gate 强制不满足条件的降为 B。
+    """
+    templates_cfg = _load_scoring_templates()
+    template = templates_cfg.get("templates", {}).get(template_id, {})
+    gates = template.get("gates", {})
+    if not gates:
+        return "B"  # 无 gate 信息的模板，保守降为 B
+
+    ds = structured_score.get("dimension_scores", {})
+    hsm = ds.get("hard_skill_match", 0)
+    will = ds.get("willingness", 0)
+    exp = ds.get("experience_depth", 0)
+
+    min_hsm = gates.get("min_hard_skill_for_a", 0)
+    min_will = gates.get("min_willingness_for_a", 0)
+    min_exp = gates.get("min_experience_for_a", 0)
+
+    if hsm < min_hsm:
+        return "B"
+    if will < min_will:
+        return "B"
+    if template_id == "senior_product_complex" and min_exp > 0 and exp < min_exp:
+        return "B"
+
+    return "A"
 
 
 def _derive_legacy_score_breakdown(structured_score: Dict[str, Any]) -> Dict[str, float]:
@@ -1163,9 +1201,16 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
         if decision not in VALID_DECISIONS:
             decision = "maybe"
 
-        priority = candidate.get("priority")
-        if priority not in VALID_PRIORITIES:
-            priority = "C"
+        # P5: 模型原始 priority 仅作参考，gate 强制降级
+        model_priority = candidate.get("priority")
+        if model_priority not in VALID_PRIORITIES:
+            model_priority = "C"
+        if model_priority == "A":
+            # 只有通过 gate 才能保持 A，否则降为 B
+            gated_priority = _apply_template_gates(structured_score, structured_score.get("template_id", ""))
+            if gated_priority != "A":
+                model_priority = "B"
+        priority = model_priority
 
         action_timing = candidate.get("action_timing")
         if action_timing not in VALID_TIMINGS:
