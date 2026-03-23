@@ -1,0 +1,940 @@
+{
+  "overall_diagnosis": "本批共处理12份简历，成功解析12份，其中12份进入推荐池；值得联系6人，备选观察5人。候选人背景主要来自产品经理等相关方向。",
+  "batch_advice": "建议优先推进 today 档的2位候选人；本周完成 this_week 档的4位候选人初筛；对5位备选候选人重点验证真实职责边界与产品 ownership。",
+  "top_recommendations": [
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_11_15K_6_邢威峰",
+      "rank": 1,
+      "candidate_name": "邢威峰",
+      "name": "邢威峰",
+      "role_label": "产品经理",
+      "total_score": 87.1,
+      "decision": "strong_yes",
+      "priority": "A",
+      "action_timing": "today",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 92.0,
+          "experience_depth": 90.0,
+          "innovation_potential": 82.0,
+          "execution_goal_breakdown": 88.0,
+          "team_fit": 78.0,
+          "willingness": 80.0,
+          "stability": 72.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "5年产品经验，互联网医疗+CRM+项目管理工具多类型覆盖，B端需求分析和产品设计能力与JD must_have直接对应",
+          "experience_depth": "全流程主导互联网医院SaaS从注册到交付，含跨团队协同和合规推动，深度超过多数同龄候选人",
+          "innovation_potential": "主导首个C端移动端互联网医疗工具医疗器械注册，创新信号明确并有落地成果",
+          "execution_goal_breakdown": "推动多端产品落地（Android/iOS/Web/小程序/支付宝），PRD到上线全链路，有成熟方法论",
+          "team_fit": "有团队组建和新人培训经验，理解各岗位分工，协作意识强",
+          "willingness": "岗位方向匹配度极高，薪资有一定谈判空间，需提前确认预期",
+          "stability": "3年2家整体稳定，但最近一份工作仅3个月，需确认非健康或信任问题"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 87.1,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "邢威峰具备5年互联网产品经验，含互联网医院全流程落地（获医疗器械注册证），与目标岗位高度匹配，综合评分87.1分，建议优先联系。",
+      "reasons": [
+        "5年产品经验，含互联网医疗CRM、项目管理工具等多类型产品全流程，B端需求分析和产品设计能力与JD must_have直接对应",
+        "主导首个C端移动端互联网医院产品落地，完成医疗器械注册证，合规创新信号强且有成果",
+        "具备开发基础（Swift/PHP/小程序云开发），能与研发有效沟通，降低跨团队协作成本"
+      ],
+      "risks": [
+        "最近一份工作（纳里健康）仅3个月，需首轮沟通中确认离职原因和身体状况",
+        "期望薪资可能超出JD范围（11-15K），需提前摸底"
+      ],
+      "score_breakdown": {
+        "hard_skill": 92.0,
+        "experience": 90.0,
+        "stability": 72.0,
+        "potential": 85.0,
+        "conversion": 79.4
+      },
+      "action": {
+        "should_contact": true,
+        "hook_message": "您好邢威峰，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好邢威峰，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "邢威峰",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_8_13K_5_李蓓",
+      "rank": 2,
+      "candidate_name": "李蓓",
+      "name": "李蓓",
+      "role_label": "产品经理",
+      "total_score": 81.85,
+      "decision": "strong_yes",
+      "priority": "A",
+      "action_timing": "today",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 85.0,
+          "experience_depth": 83.0,
+          "innovation_potential": 75.0,
+          "execution_goal_breakdown": 85.0,
+          "team_fit": 80.0,
+          "willingness": 78.0,
+          "stability": 74.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "5年产品，B端城市大脑和大数据防汛系统与目标岗位直接相关，PRD能力和需求挖掘与JD要求吻合",
+          "experience_depth": "区县城市大脑数字驾驶舱项目从投标到交付全程主导，含多部门协调和汇报，深度较好",
+          "innovation_potential": "大数据可视化和防汛系统有创新空间，但以需求实现为主，0-1探索信号一般",
+          "execution_goal_breakdown": "跨大数据局、医保局等多部门推动能力强，项目全生命周期管理经验丰富",
+          "team_fit": "多部门协调和客户汇报经验丰富，团队融入能力强",
+          "willingness": "岗位方向一致，在宁波有稳定生活基础，可到杭州需确认",
+          "stability": "5年2家，较稳定，最近一份工作2年需确认离职原因"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 81.85,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "李蓓具备5年产品经验，主导城市大脑数字驾驶舱和大数据防汛系统等B端复杂项目，与岗位匹配度较高，综合评分81.7分，建议优先联系。",
+      "reasons": [
+        "5年产品经验，城市大脑和医保大数据等B端复杂项目全程主导，PRD到交付全链路负责",
+        "负责与大数据局、医保局、统计局等多部门协调，跨团队推动能力与目标岗位要求高度吻合",
+        "信息管理专业出身，逻辑清晰，有大数据产品设计背景，理解数据驱动产品方法"
+      ],
+      "risks": [
+        "薪资期望可能偏高（当前薪资未知），需提前确认是否在岗位范围内",
+        "最近一份工作2年，跳槽频率略高，需确认离职驱动因素"
+      ],
+      "score_breakdown": {
+        "hard_skill": 85.0,
+        "experience": 83.0,
+        "stability": 74.0,
+        "potential": 80.0,
+        "conversion": 78.6
+      },
+      "action": {
+        "should_contact": true,
+        "hook_message": "您好李蓓，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好李蓓，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "李蓓",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_8_13K_9_孙铜",
+      "rank": 3,
+      "candidate_name": "孙铜",
+      "name": "孙铜",
+      "role_label": "产品经理",
+      "total_score": 74.65,
+      "decision": "yes",
+      "priority": "B",
+      "action_timing": "this_week",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 78.0,
+          "experience_depth": 80.0,
+          "innovation_potential": 65.0,
+          "execution_goal_breakdown": 78.0,
+          "team_fit": 68.0,
+          "willingness": 70.0,
+          "stability": 58.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "8年产品，B端平台和ERP系统经验与目标岗位相关，但行业偏向传统软件",
+          "experience_depth": "8年多段B端企业软件，含工程运输车辆管控、营运车辆监控等复杂平台，深度足够",
+          "innovation_potential": "自评创新能力强，但具体创新成果描述较模糊，证据有限",
+          "execution_goal_breakdown": "有完整PRD、原型、跨团队协调和上线验收经验，执行落地能力强",
+          "team_fit": "有软件团队协作经验，但以B端项目制为主，与互联网产品团队协作方式有差异",
+          "willingness": "期望薪资12000+与岗位上限接近，地点在宁波，可接受，需提前确认",
+          "stability": "8年3家，跳槽较频繁，需确认非负面原因（如团队问题/公司问题）"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 74.65,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "孙铜有8年软件产品经验，含B端平台和ERP系统，但跳槽频率偏高且学历背景弱，综合评分74.8分，建议本周内联系。",
+      "reasons": [
+        "8年产品经验，B端平台、ERP、交通管理平台等多系统，有完整的需求分析和产品落地经历",
+        "有中信卫星通信和云天支付等B端企业级产品经历，能理解企业级产品逻辑",
+        "有产品原型设计、需求文档编写和跨团队协调能力，基本功扎实"
+      ],
+      "risks": [
+        "8年3家，跳槽较频繁（2015-2018年一段，2018-2021年一段），需重点核实稳定性动机",
+        "学历未明确写出本科，需确认是否满足岗位学历要求",
+        "期望薪资12000以上，与岗位上限13K接近，需提前确认"
+      ],
+      "score_breakdown": {
+        "hard_skill": 78.0,
+        "experience": 80.0,
+        "stability": 58.0,
+        "potential": 71.5,
+        "conversion": 69.4
+      },
+      "action": {
+        "should_contact": true,
+        "hook_message": "您好孙铜，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好孙铜，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "孙铜",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_8_13K_3_吴嘉楠",
+      "rank": 4,
+      "candidate_name": "吴嘉楠",
+      "name": "吴嘉楠",
+      "role_label": "产品经理",
+      "total_score": 68.5,
+      "decision": "yes",
+      "priority": "B",
+      "action_timing": "this_week",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 68.0,
+          "experience_depth": 64.0,
+          "innovation_potential": 70.0,
+          "execution_goal_breakdown": 70.0,
+          "team_fit": 74.0,
+          "willingness": 76.0,
+          "stability": 72.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "3年产品，toC为主，乐歌人体工学App和小程序产品，B端平台经验有限，与目标岗位有差距",
+          "experience_depth": "3年，含UI设计和产品管理，以toC功能迭代为主，B端复杂系统经验不足",
+          "innovation_potential": "有独立发现产品问题和提出改进方案经历，但以功能优化为主，0-1探索有限",
+          "execution_goal_breakdown": "有PRD输出、跨团队推动（UI/技术/测试）经验，能推动产品上线和迭代",
+          "team_fit": "有UI设计背景，理解设计和交互逻辑，与设计团队协作有优势",
+          "willingness": "目前在宁波有稳定工作，乐歌2年，需确认是否愿意看新机会",
+          "stability": "3年2家，在乐歌已2年，稳定性中等偏上"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 68.5,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "吴嘉楠有3年产品经验，含UI设计和B端产品经历，但以toC为主、B端经验较少，综合评分70.8分，建议本周内联系。",
+      "reasons": [
+        "3年产品经验，toC和toB均有经历，乐歌人体工学产品负责App和小程序产品，有独立输出PRD能力",
+        "兼顾UI设计（视觉和交互），对用户体验有直观理解，有助于与设计团队协作",
+        "目前在乐歌工作2年，稳定性尚可，产品方向有一定延续性"
+      ],
+      "risks": [
+        "B端产品经验较少，以toC人体工学App为主，与目标B端产品存在差距",
+        "薪资期望可能受当前工作影响，需确认是否接受岗位薪资范围（8-13K宁波）",
+        "目前职位含UI设计，需确认是否愿意专注纯产品方向"
+      ],
+      "score_breakdown": {
+        "hard_skill": 68.0,
+        "experience": 64.0,
+        "stability": 72.0,
+        "potential": 70.0,
+        "conversion": 75.4
+      },
+      "action": {
+        "should_contact": true,
+        "hook_message": "您好吴嘉楠，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好吴嘉楠，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "吴嘉楠",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_8_13K_2_姜月",
+      "rank": 5,
+      "candidate_name": "姜月",
+      "name": "姜月",
+      "role_label": "产品经理",
+      "total_score": 65.9,
+      "decision": "yes",
+      "priority": "B",
+      "action_timing": "this_week",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 65.0,
+          "experience_depth": 62.0,
+          "innovation_potential": 60.0,
+          "execution_goal_breakdown": 72.0,
+          "team_fit": 72.0,
+          "willingness": 74.0,
+          "stability": 76.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "2年产品+实施，MES系统制造业数字化与目标岗位有一定差距，但有企业级产品理解",
+          "experience_depth": "MES一期二期从调研到上线全程主导，有客户需求管理、方案实施和产品迭代经验",
+          "innovation_potential": "以需求实现和项目管理为主，主动发现创新机会的信号一般",
+          "execution_goal_breakdown": "跨甲方（赛特威尔、吉利）和内部团队推动能力强，项目交付率高",
+          "team_fit": "在甲方现场有跨部门协调经验，有培训用户和推动上线经验",
+          "willingness": "2年在文谷科技，稳定性好，需确认是否愿意转互联网产品方向",
+          "stability": "2年1家，稳定性较好，无频繁跳槽信号"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 65.9,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "姜月有2年产品经理和实施工程师经验，主导MES系统二期项目，有制造业数字化背景，综合评分67.2分，建议本周内联系。",
+      "reasons": [
+        "MES系统全流程主导，一期二期全部顺利结案，有完整的需求-设计-实施-上线经历",
+        "在吉利集团汽车电子项目中承担项目管理和产品实施双重职责，有跨企业协作经验",
+        "制造业数字化转型方向与商用清洁机器人有一定相关度，行业理解有价值"
+      ],
+      "risks": [
+        "MES实施性质偏重客户现场部署和服务，与纯互联网产品经理有区别",
+        "2年经验，产品经理独立判断能力待验证，可能需要一定辅导期",
+        "目前薪资未知，需确认是否在岗位范围（8-13K）内"
+      ],
+      "score_breakdown": {
+        "hard_skill": 65.0,
+        "experience": 62.0,
+        "stability": 76.0,
+        "potential": 66.0,
+        "conversion": 73.4
+      },
+      "action": {
+        "should_contact": true,
+        "hook_message": "您好姜月，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好姜月，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "姜月",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_8_13K_Rango_4_唐晓斌",
+      "rank": 6,
+      "candidate_name": "唐晓斌",
+      "name": "唐晓斌",
+      "role_label": "产品经理",
+      "total_score": 63.2,
+      "decision": "yes",
+      "priority": "B",
+      "action_timing": "this_week",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 62.0,
+          "experience_depth": 60.0,
+          "innovation_potential": 62.0,
+          "execution_goal_breakdown": 64.0,
+          "team_fit": 72.0,
+          "willingness": 70.0,
+          "stability": 72.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "4年含运营和产品，运营比例较高，产品专业深度有限，与目标岗位有差距",
+          "experience_depth": "产品专员的职责深度（需求沟通、进度管理）与产品经理有重叠但不够完整",
+          "innovation_potential": "有产品运营和竞品分析经历，对产品迭代有理解，但主动创新信号有限",
+          "execution_goal_breakdown": "有PRD、进度管理、版本管理上线经验，执行落地能力有基础",
+          "team_fit": "有跨部门协调和培训经验，产品运营背景有利于团队协作",
+          "willingness": "目前工作2年，稳定，但需确认对产品经理方向的强烈程度",
+          "stability": "4年2家，较稳定"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 63.2,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "唐晓斌有4年经验，含产品专员和运营，运营背景较重、产品深度有限，与目标岗位有差距，综合评分63.2分，建议本周内联系。",
+      "reasons": [
+        "4年经验，有产品全流程（需求调研、PRD、原型、进度管理、版本管理）经历",
+        "运营背景对产品推广、用户培训有加分，了解产品运营逻辑",
+        "浙江大学毕业，学历较好，学习能力有基础"
+      ],
+      "risks": [
+        "运营专员占比高（2019-2020年），产品经理深度不够，与目标岗位有差距",
+        "期望薪资未知，需提前确认是否接受岗位范围（8-13K宁波）",
+        "目前在浙江商安，运营和产品边界需在沟通中核实"
+      ],
+      "score_breakdown": {
+        "hard_skill": 62.0,
+        "experience": 60.0,
+        "stability": 72.0,
+        "potential": 63.0,
+        "conversion": 70.6
+      },
+      "action": {
+        "should_contact": true,
+        "hook_message": "您好唐晓斌，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好唐晓斌，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "唐晓斌",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_11_15K_2_张金莎",
+      "rank": 7,
+      "candidate_name": "张金莎",
+      "name": "张金莎",
+      "role_label": "产品经理",
+      "total_score": 56.1,
+      "decision": "maybe",
+      "priority": "C",
+      "action_timing": "optional",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 55.0,
+          "experience_depth": 52.0,
+          "innovation_potential": 58.0,
+          "execution_goal_breakdown": 55.0,
+          "team_fit": 65.0,
+          "willingness": 58.0,
+          "stability": 70.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "2年含开发转产品，高速公路数据服务项目和编程App经验与目标岗位有差距",
+          "experience_depth": "开发出身，产品经验有限，有项目实施经历但全流程主导能力待验证",
+          "innovation_potential": "P.I编程App有用户调研和竞品分析，主动创新有一定意识但证据有限",
+          "execution_goal_breakdown": "有数据服务项目全流程经历，但以开发和实施为主，产品推动能力待验证",
+          "team_fit": "有甲方驻场和跨团队协调经历，沟通协作能力有一定基础",
+          "willingness": "从开发转产品有一定转型意愿，但需确认对B端产品方向的坚定程度",
+          "stability": "2年1家，稳定性较好，无频繁跳槽信号"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 56.1,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "张金莎有软件开发转产品经历，含P.I编程App完整产品设计，但软件开发背景偏重，综合评分56.2分，建议观察。",
+      "reasons": [
+        "有P.I编程App完整产品设计经历，含用户调研、竞品分析、原型和PRD，有产品全流程经验",
+        "有高速公路省界收费站数据服务项目经验，含需求分析到上线的完整链路",
+        "从开发转产品，有技术理解优势，沟通成本可能较低"
+      ],
+      "risks": [
+        "2年含开发转产品，产品经验以实施和数据服务为主，与目标B端产品有差距",
+        "个人定位仍偏技术开发，需确认是否接受纯产品方向",
+        "地理位置不确定（山东济南），需确认杭州意愿"
+      ],
+      "score_breakdown": {
+        "hard_skill": 55.0,
+        "experience": 52.0,
+        "stability": 70.0,
+        "potential": 56.5,
+        "conversion": 60.1
+      },
+      "action": {
+        "should_contact": false,
+        "hook_message": "您好张金莎，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好张金莎，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "张金莎",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_11_15K_2_周俊仕",
+      "rank": 8,
+      "candidate_name": "周俊仕",
+      "name": "周俊仕",
+      "role_label": "产品经理",
+      "total_score": 53.45,
+      "decision": "maybe",
+      "priority": "C",
+      "action_timing": "optional",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 50.0,
+          "experience_depth": 48.0,
+          "innovation_potential": 62.0,
+          "execution_goal_breakdown": 52.0,
+          "team_fit": 62.0,
+          "willingness": 60.0,
+          "stability": 65.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "2年含开发转产品，后端开发经验对理解技术边界有优势，但产品技能历练不足",
+          "experience_depth": "以开发为主（2年C/C++后端，Python视觉），产品经验较浅且为辅助角色",
+          "innovation_potential": "AI视觉项目有一定技术探索，产品创新思维待验证",
+          "execution_goal_breakdown": "有PRD和竞品分析经历，但以辅助角色参与为主，执行推动能力有限",
+          "team_fit": "华为外包环境中有多方协调经验，对目标岗位有初步理解",
+          "willingness": "有明确转型产品经理意愿，但需确认对B端产品方向的坚定程度",
+          "stability": "2年2家，工程师路线稳定性尚可，但转型期稳定性风险较高"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 53.45,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "周俊仕有2年开发转产品背景，AI视觉项目有一定探索，但产品经理专业能力较浅，综合评分53.5分，建议观察。",
+      "reasons": [
+        "有C/C++后端和Python视觉开发背景，对AI产品技术面理解较好",
+        "有竞品分析、PRD撰写等基础产品技能，有基本方法论框架",
+        "在华为项目中有与产品对接经验，了解产品经理职责边界"
+      ],
+      "risks": [
+        "2年经验中开发为主（2020-2022），产品实际历练时间短，深度不足",
+        "目前薪资和工作内容接近开发而非产品，需确认转型决心",
+        "软通动力外包身份可能影响候选人质量和稳定性预期"
+      ],
+      "score_breakdown": {
+        "hard_skill": 50.0,
+        "experience": 48.0,
+        "stability": 65.0,
+        "potential": 57.0,
+        "conversion": 60.6
+      },
+      "action": {
+        "should_contact": false,
+        "hook_message": "您好周俊仕，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好周俊仕，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "周俊仕",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_11_15K_2_许罗栋",
+      "rank": 9,
+      "candidate_name": "许罗栋",
+      "name": "许罗栋",
+      "role_label": "产品经理",
+      "total_score": 51.65,
+      "decision": "maybe",
+      "priority": "C",
+      "action_timing": "optional",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 48.0,
+          "experience_depth": 45.0,
+          "innovation_potential": 55.0,
+          "execution_goal_breakdown": 52.0,
+          "team_fit": 65.0,
+          "willingness": 62.0,
+          "stability": 72.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "解决方案工程师，有PRD和原型经历但非专业产品经理，与目标岗位有明显差距",
+          "experience_depth": "参与多个政务产品项目，有需求分析和产品演示经验，但深度有限",
+          "innovation_potential": "政务数字化项目有创新空间，但以解决方案为主，主动创新信号一般",
+          "execution_goal_breakdown": "有产品演示和客户培训经验，但推动内部产品开发的能力有限",
+          "team_fit": "有客户对接和跨部门协调经历，产品团队融入需要适应期",
+          "willingness": "期望地点（绍兴/弹性）与岗位（杭州）不完全匹配，需确认意愿",
+          "stability": "2年1家，稳定性较好"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 51.65,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "许罗栋是解决方案工程师出身，有PRD编写和原型设计经验，但产品经理直接经验少，综合评分51.6分，建议观察。",
+      "reasons": [
+        "有浙江省文旅平台、福州市智慧城市等多个政务产品项目经历，有需求分析经验",
+        "有PRD编写、产品演示和原型设计经历，有基础产品技能",
+        "有招投标和产品培训经验，对产品商业化有一定理解"
+      ],
+      "risks": [
+        "解决方案工程师背景，非纯产品经理，产品经理专业能力历练不足",
+        "期望地点绍兴或弹性，需确认是否接受杭州岗位",
+        "在浙江农林大学有GIS背景，需确认是否愿意专注产品方向"
+      ],
+      "score_breakdown": {
+        "hard_skill": 48.0,
+        "experience": 45.0,
+        "stability": 72.0,
+        "potential": 53.5,
+        "conversion": 62.9
+      },
+      "action": {
+        "should_contact": false,
+        "hook_message": "您好许罗栋，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好许罗栋，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "许罗栋",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_8_13K_2_王宏宇",
+      "rank": 10,
+      "candidate_name": "王宏宇",
+      "name": "王宏宇",
+      "role_label": "产品经理",
+      "total_score": 49.4,
+      "decision": "maybe",
+      "priority": "C",
+      "action_timing": "optional",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 42.0,
+          "experience_depth": 45.0,
+          "innovation_potential": 50.0,
+          "execution_goal_breakdown": 55.0,
+          "team_fit": 60.0,
+          "willingness": 58.0,
+          "stability": 78.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "项目经理背景，有别于产品经理，用户需求和设计能力缺失，与目标岗位差距较大",
+          "experience_depth": "6年专注车载光学硬件项目管理，有复杂跨团队项目成功经验，但非产品方向",
+          "innovation_potential": "在车载复杂项目中有多次创新方案（如良率70%提升），有一定创新意识",
+          "execution_goal_breakdown": "项目全生命周期管理能力强，含预算、进度、质量和风险管控",
+          "team_fit": "有国际车企客户管理和内部多团队协调经验，沟通能力强",
+          "willingness": "目前工作稳定6年1家，需确认对产品经理转型的强烈意愿",
+          "stability": "6年1家，稳定性极好，但转型风险较高"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 49.4,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "王宏宇是项目经理，专注车载光学硬件项目管理，有团队管理和客户协调能力，但产品经理专业技能不足，综合评分49.4分，建议观察。",
+      "reasons": [
+        "主导Conti、BOSCH等国际车企激光雷达和AR HUD部件项目，有高复杂度项目管理能力",
+        "有成本控制（降本14%）和良率提升（70%）等量化成果，协作能力强",
+        "有客户关系维护和预期管理经验，理解项目全生命周期"
+      ],
+      "risks": [
+        "背景是项目经理而非产品经理，PRD、设计和用户需求能力缺失",
+        "专注硬件车载产品，与互联网产品差异大，需确认转型意愿",
+        "目前薪酬和工作内容完全偏离产品经理，需确认是否有真实转型意愿"
+      ],
+      "score_breakdown": {
+        "hard_skill": 42.0,
+        "experience": 45.0,
+        "stability": 78.0,
+        "potential": 52.5,
+        "conversion": 58.6
+      },
+      "action": {
+        "should_contact": false,
+        "hook_message": "您好王宏宇，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好王宏宇，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "王宏宇",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_11_18K_6_滕锋帅",
+      "rank": 11,
+      "candidate_name": "滕锋帅",
+      "name": "滕锋帅",
+      "role_label": "产品经理",
+      "total_score": 44.3,
+      "decision": "maybe",
+      "priority": "C",
+      "action_timing": "optional",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 40.0,
+          "experience_depth": 38.0,
+          "innovation_potential": 48.0,
+          "execution_goal_breakdown": 48.0,
+          "team_fit": 58.0,
+          "willingness": 55.0,
+          "stability": 55.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "软件工程师背景，以实施和运维为主，与产品经理职责有根本差异",
+          "experience_depth": "有区域医共体平台实施经验，含his/lis等系统部署，但非产品规划能力",
+          "innovation_potential": "在医疗信息化实施中有一些问题解决和创新经验，但证据有限",
+          "execution_goal_breakdown": "有项目交付和客户培训经验，实施推动力强，但产品规划能力缺失",
+          "team_fit": "有客户现场培训和跨部门协调经验，但工程师思维可能影响产品团队协作",
+          "willingness": "期望薪资范围与岗位接近，需确认实施转产品的强烈意愿",
+          "stability": "6年2家，有一段不满1年，稳定性中等，需确认非负面原因"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 44.3,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "滕锋帅是软件工程师，主导区域医共体平台建设，有医疗信息化实施经验，但非产品经理背景，综合评分44.3分，建议观察。",
+      "reasons": [
+        "有区域医共体平台建设经历，熟悉医疗信息化业务（his/lis/pacs/emr）",
+        "有软件实施、需求调研、客户培训和验收全流程经验",
+        "有医疗行业客户现场部署和多方协调经历，行业理解有价值"
+      ],
+      "risks": [
+        "核心背景是软件工程师（实施方向），非产品经理，PRD、设计等能力缺失",
+        "期望薪资10-15万与岗位11-15K接近，但实施转产品存在较大角色差异",
+        "期望地点绍兴，需确认是否接受杭州或宁波岗位"
+      ],
+      "score_breakdown": {
+        "hard_skill": 40.0,
+        "experience": 38.0,
+        "stability": 55.0,
+        "potential": 48.0,
+        "conversion": 55.9
+      },
+      "action": {
+        "should_contact": false,
+        "hook_message": "您好滕锋帅，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好滕锋帅，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "滕锋帅",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    },
+    {
+      "candidate_id": "local_runs_run_20260323_214437_inbox_8_13K_1_杨淑婷",
+      "rank": 12,
+      "candidate_name": "杨淑婷",
+      "name": "杨淑婷",
+      "role_label": "产品经理",
+      "total_score": 37.5,
+      "decision": "no",
+      "priority": "C",
+      "action_timing": "optional",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 30.0,
+          "experience_depth": 28.0,
+          "innovation_potential": 45.0,
+          "execution_goal_breakdown": 40.0,
+          "team_fit": 60.0,
+          "willingness": 50.0,
+          "stability": 65.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "工作经验不足1年，无正式产品经理经历，技能与目标岗位差距明显",
+          "experience_depth": "以实习和助理角色参与产品工作，独立负责产品模块的经验缺失",
+          "innovation_potential": "计算机专业出身，有基础逻辑思维，但产品创新经历有限",
+          "execution_goal_breakdown": "有PRD编写和客户培训经历（实习），但深度不足以承担目标岗位职责",
+          "team_fit": "有学生会外联和赞助经历，性格开朗，团队融入基础可",
+          "willingness": "目前求职方向偏项目助理，需确认是否强烈想走产品方向",
+          "stability": "应届或1年内，稳定性信号不足，需要时间成长"
+        },
+        "template_id": "senior_product_complex",
+        "weighted_total": 37.5,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 25,
+          "innovation_potential": 15,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "杨淑婷工作经验不足1年，以项目经理助理实习为主，无正式产品经理经验，与目标岗位匹配度较弱，当前不建议推进。",
+      "reasons": [
+        "2021年毕业，工作经验不足1年，以实习和项目经理助理为主",
+        "有软件工程和计算机背景，基本功有一定基础",
+        "有产品经理助理实习经历，对产品工作有初步接触"
+      ],
+      "risks": [
+        "无正式产品经理经验，实习内容（协助设计、写报告）不足以支撑目标岗位要求",
+        "专业为计算机但有开发能力偏向，需较长时间转型",
+        "目前求职方向是项目经理助理，与目标产品经理岗位有偏差"
+      ],
+      "score_breakdown": {
+        "hard_skill": 30.0,
+        "experience": 28.0,
+        "stability": 65.0,
+        "potential": 42.5,
+        "conversion": 53.0
+      },
+      "action": {
+        "should_contact": false,
+        "hook_message": "您好杨淑婷，看到您的简历与我们的高级产品经理岗位有一定匹配度，想简单聊几句。",
+        "verification_question": "您目前的工作主要内容是？",
+        "message_template": "您好杨淑婷，我是某公司HR，我们正在寻找一位高级产品经理，看到您的经历有一定相关性，方便加微信聊聊吗？",
+        "deep_questions": [
+          "您目前这份工作的主要成果是什么？",
+          "您为什么考虑新机会？",
+          "您的职业规划是？"
+        ]
+      },
+      "identity_meta": {
+        "canonical_name": "杨淑婷",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    }
+  ]
+}
