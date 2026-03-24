@@ -1,3 +1,6 @@
+# Feishu 多维表格访问地址（固定值，勿改）
+FEISHU_TABLE_URL = "https://ucn43sn4odey.feishu.cn/base/AINFbZLOQaSo6rslOeZc95RTnPb"
+
 """
 最终报告生成模块
 
@@ -177,9 +180,17 @@ class FinalReporter:
     def save_owner_summary(
         self,
         candidates: List[Dict[str, Any]],
+        jd_title: str = "待确认",
+        jd_location: str = "待确认",
+        jd_salary: str = "待确认",
         filename: str = "owner_summary.md",
     ) -> Path:
-        summary = self.generate_owner_summary(candidates)
+        summary = self.generate_owner_summary(
+            candidates,
+            jd_title=jd_title,
+            jd_location=jd_location,
+            jd_salary=jd_salary,
+        )
         summary_path = self.output_dir / filename
         with open(summary_path, "w", encoding="utf-8") as handle:
             handle.write(summary)
@@ -421,6 +432,7 @@ class FinalReporter:
         # 元信息
         lines.append(f"**run_id：** {self.output_dir.name}")
         lines.append(f"**生成时间：** {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        lines.append(f"**飞书表格：** {FEISHU_TABLE_URL}")
 
         return "\n".join(lines).rstrip() + "\n"
 

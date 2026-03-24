@@ -90,6 +90,7 @@
 
 **run_id：** {run_id}
 **生成时间：** {生成时间}
+**飞书表格：** {feishu_table_url}
 ```
 
 ---
@@ -122,4 +123,5 @@
 
 **run_id：** run_20260324_194538
 **生成时间：** 2026-03-24 19:47
+**飞书表格：** https://ucn43sn4odey.feishu.cn/base/AINFbZLOQaSo6rslOeZc95RTnPb
 ```
