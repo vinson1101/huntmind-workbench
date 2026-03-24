@@ -340,19 +340,74 @@ TalentFlow 负责：
 
 ---
 
-## 12. 参考文档
+## 12. Execution Contract — 执行约束（必须遵守）
+
+以下约束通过 SKILL.md 强制执行，docs 目录下的说明文档只负责解释，不构成执行约束。
+
+### 12.1 一轮 skill = 一轮完整招聘处理
+- 一轮 skill 处理一个 JD + 一批简历
+- 结果落 Runs 表（1条） + Candidates 表（N条）
+- 不做跨批次合并、不做 backfill
+
+### 12.2 JD / 简历输入方式
+| 输入 | 方式 |
+|------|------|
+| JD | 结构化 `jd.json`（推荐）或自然语言描述 |
+| 飞书云盘简历 | HR 上传到飞书云盘，提供 folder_token，调用 `load_feishu_resume_files()` 下载 |
+| 聊天窗口简历 | HR 直接发送附件，保存到 inbox/ |
+
+### 12.3 inbox 汇流，但 source 元信息必须保留
+- 所有简历最终进入 `inbox/`，主处理逻辑不因来源分叉
+- `source.platform` / `file_id` / `file_name` 必须写入 batch_input
+- 用于追溯来源和生成 resume_link，不得丢弃
+
+### 12.4 标准输出与飞书写表
+- 最终产物：`final_output.json` + `owner_summary.md`
+- 自动写入飞书 Runs 表 + Candidates 表
+- HR 反馈字段（跟进状态/HR备注/面试结果/最终结果）不被 AI 覆盖
+
+### 12.5 禁止事项
+- ❌ backfill
+- ❌ 演示评分算法 / 人工造数据跑 pipeline
+- ❌ 改动前不跑 golden set 验证
+
+### 12.6 改前必验
+任何对评分体系、模板选择、pipeline 脚本的改动，必须：
+1. 用 `evals/golden_set/product_manager_batch_001/` 回归集验证
+2. 对照 `expected_review.md` 检查排名和质量分
+3. 通过 quality_gate（quality_score ≥ 85）
+
+### 12.7 写表 schema 稳定，视图 UX 可迭代
+- 底层写表字段结构保持稳定
+- 视图层（字段顺序、排序、筛选）允许在实战中人工微调
+- 不为微调视图而频繁改动底层写表逻辑
+
+### 12.8 HR 默认使用当前 run 视图
+- 每轮结果默认通过「当前 run 过滤视图」查看
+- 不建议直接浏览全量 Candidates 总表
+- 视图过滤条件：`批次ID` = 当前 run_id
+
+### 12.9 排名必须有，推荐不必须有
+- 每批都按分数降序排名（1=最高分）
+- 不是每批都必须有 strong_yes 或 A 类——整批不达标是正常结果
+- 禁止为"有输出"强行凑推荐理由
+
+---
+
+## 13. 参考文档
 
 - `references/decision-policy.md`
 - `references/output-contract.md`
-- `references/scoring-policy.md` — **7维评分体系主规则**（含责任边界）
+- `references/scoring-policy.md` — **7维评分体系主规则**（含执行约束）
 - `references/conversion-guidelines.md`
 - `references/writing-style-constraints.md`
+- `docs/TalentFlow-招聘审核完整流程说明-V1.4.md` — 流程说明（不构成执行约束）
 
 这些文档用于补充规则与格式，不应把所有细节硬塞进本文件正文。
 
 ---
 
-## 13. 脚本入口
+## 14. 脚本入口
 
 - `scripts/validate_batch_input.py`
 - `scripts/validate_model_output.py`
@@ -361,7 +416,7 @@ TalentFlow 负责：
 
 ---
 
-## 14. 触发测试样例
+## 15. 触发测试样例
 
 下面这些测试样例用于验证路由是否合理。
 
@@ -383,7 +438,7 @@ TalentFlow 负责：
 
 ---
 
-## 15. 使用提醒
+## 16. 使用提醒
 
 当任务满足触发条件时，应优先把问题识别为：
 
