@@ -284,11 +284,13 @@ def build_candidate_records(
         source_file_name = src.get("file_name", "")
 
         # resume_link: 飞书直传/云目录文件写入打开链接，非飞书来源则为空
+        # 注意：飞书多维表格 URL 字段类型有域名验证限制，
+        # 故使用文本类型字段存储链接，格式为 https://ucn43sn4odey.feishu.cn/file/{token}
         resume_link = ""
         if source_platform == "feishu":
             file_id = src.get("file_id", "")
             if file_id:
-                resume_link = f"https://ucn43sn4odey.feishu.cn/drive/{file_id}"
+                resume_link = f"https://ucn43sn4odey.feishu.cn/file/{file_id}"
         # 其他平台（local/dingtalk 等）暂不生成链接
 
         # structured_score
