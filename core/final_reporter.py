@@ -350,7 +350,7 @@ class FinalReporter:
         this_week_candidates = [c for c in candidates if c.get("action_timing") == "this_week"]
 
         def _fmt(c: Dict[str, Any]) -> str:
-            score = int(float(c.get("total_score") or 0))
+            score = round(float(c.get("total_score") or 0), 1)
             return f"{self._display_name(c)}（{score}分）"
 
         def _fmt_list(cands: List[Dict[str, Any]]) -> str:
@@ -370,7 +370,7 @@ class FinalReporter:
         ]
 
         # ---- Block 2: 批次概览 ----
-        lines.append(f"本批共处理 {len(candidates)} 份简历，决策结果：")
+        lines.append(f"本批共处理 {stats['total_processed']} 份简历，决策结果：")
         lines.append("")
 
         # ---- Block 3: 分档表 ----
@@ -386,7 +386,7 @@ class FinalReporter:
         lines.append("**今日优先联系：**")
         if today_candidates:
             for c in today_candidates:
-                score = int(float(c.get("total_score") or 0))
+                score = round(float(c.get("total_score") or 0), 1)
                 lines.append(f"- **{self._display_name(c)}**（{score}分 / {c.get('priority','')}）：{self._summary_judgement(c)}。风险：{_risk_short(c)}")
         else:
             lines.append("- 无")
@@ -512,7 +512,6 @@ class FinalReporter:
         role_label = self._role_label(candidate)
         priority = _clean_text(candidate.get("priority"))
         decision = _clean_text(candidate.get("decision"))
-        score = int(float(candidate.get("total_score", 0) or 0))
 
         if "项目经理" in role_label:
             if decision in {"strong_yes", "yes"}:
@@ -525,12 +524,12 @@ class FinalReporter:
             return f"{display_name}与目标岗位匹配度偏弱，当前不建议作为正式候选人推进。"
 
         if priority == "A":
-            return f"{display_name}与目标岗位匹配度较高，综合评分{score}分，建议优先联系。"
+            return f"{display_name}与目标岗位匹配度较高，建议优先联系。"
 
         if decision in {"strong_yes", "yes"}:
-            return f"{display_name}具备较明确的相关经验信号，综合评分{score}分，建议安排首轮沟通。"
+            return f"{display_name}具备较明确的相关经验信号，建议安排首轮沟通。"
 
-        return f"{display_name}具备一定匹配度，综合评分{score}分，可作为备选进一步核实。"
+        return f"{display_name}具备一定匹配度，可作为备选进一步核实。"
 
     def _collect_common_risks(self, candidates: List[Dict[str, Any]]) -> List[str]:
         risks: List[str] = []
