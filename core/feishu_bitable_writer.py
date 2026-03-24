@@ -29,72 +29,72 @@ CANDIDATES_TABLE_NAME = "Candidates"
 # Runs 表字段定义（field_name → type）
 # type: 1=文本, 2=数字, 3=单选, 4=多选, 5=日期, 7=复选框, 11=人员, 13=电话, 15=超链接, 1001=创建时间
 RUN_FIELDS: Dict[str, int] = {
-    "run_id": 1,                   # 文本
-    "jd_title": 1,                 # 文本
-    "jd_location": 1,              # 文本
-    "jd_salary_range": 1,          # 文本
-    "candidate_count": 2,          # 数字
-    "contact_count": 2,            # 数字
-    "top_candidate_names": 1,      # 文本（数组转文本）
-    "quality_score": 2,            # 数字
-    "quality_flag": 1,             # 文本
-    "identity_conflict_count": 2,  # 数字
-    "avg_score": 2,                # 数字
-    "output_version": 1,           # 文本
-    "owner_summary": 1,            # 文本（长文本）
-    "batch_input_path": 1,         # 文本
-    "final_output_path": 1,        # 文本
-    "created_at": 5,               # 日期（毫秒时间戳）
+    "批次ID": 1,
+    "JD标题": 1,
+    "JD地点": 1,
+    "JD薪资范围": 1,
+    "候选人数": 2,
+    "建议联系人数": 2,
+    "Top候选人": 1,
+    "质量分": 2,
+    "质量标记": 1,
+    "身份冲突数": 2,
+    "平均分": 2,
+    "输出版本": 1,
+    "批次摘要": 1,
+    "batch_input路径": 1,
+    "final_output路径": 1,
+    "创建时间": 5,
 }
 
 # Candidates 表字段定义
 CANDIDATE_FIELDS: Dict[str, int] = {
     # 基础识别
-    "run_id": 1,
-    "candidate_id": 1,
-    "candidate_name": 1,
-    "canonical_name": 1,
-    "role_label": 1,
-    "source_platform": 1,
-    "source_file_name": 1,
+    "批次ID": 1,
+    "候选人ID": 1,
+    "候选人姓名": 1,
+    "规范姓名": 1,
+    "角色标签": 1,
+    "来源平台": 1,
+    "原始文件名": 1,
     # AI 决策主字段
-    "rank": 2,
-    "total_score": 2,
-    "decision": 1,
-    "priority": 1,
-    "action_timing": 1,
-    "should_contact": 7,
-    "core_judgement": 1,
-    "reasons": 1,
-    "risks": 1,
-    "verification_question": 1,
-    "hook_message": 1,
-    "message_template": 1,
+    "排名": 2,
+    "综合评分": 2,
+    "决策结论": 1,
+    "优先级": 1,
+    "行动时机": 1,
+    "建议联系": 7,
+    "核心判断": 1,
+    "推荐理由": 1,
+    "风险提示": 1,
+    "核实问题": 1,
+    "钩子消息": 1,
+    "联系话术模板": 1,
     # 7维评分
-    "hard_skill_match": 2,
-    "experience_depth": 2,
-    "innovation_potential": 2,
-    "execution_goal_breakdown": 2,
-    "team_fit": 2,
-    "willingness": 2,
-    "stability": 2,
-    "template_id": 1,
-    "weighted_total": 2,
-    "dimension_evidence_summary": 1,
+    "硬技能匹配": 2,
+    "经验深度": 2,
+    "创新潜能": 2,
+    "目标拆解执行": 2,
+    "团队融合": 2,
+    "意愿度": 2,
+    "稳定性": 2,
+    "模板ID": 1,
+    "加权总分": 2,
+    "证据摘要": 1,
     # 质量与身份
-    "has_identity_conflict": 7,
-    "identity_resolution": 1,
-    "conflict_fields": 1,
-    "quality_note": 1,
-    # 人工跟进字段（脚本不覆盖，仅写入预留）
-    "follow_up_status": 1,
-    "hr_owner": 1,
-    "hr_comment": 1,
-    "interview_result": 1,
-    "reject_reason": 1,
-    "manual_priority": 1,
-    "manual_override_note": 1,
-    "final_outcome": 1,
+    "身份冲突": 7,
+    "身份处理方案": 1,
+    "冲突字段": 1,
+    "质量备注": 1,
+    # 人工跟进字段（预留，不覆盖）
+    "跟进状态": 1,
+    "HR负责人": 1,
+    "HR备注": 1,
+    "面试结果": 1,
+    "拒绝原因": 1,
+    "人工优先级": 1,
+    "人工覆盖说明": 1,
+    "最终结果": 1,
 }
 
 # 飞书字段类型映射到名称（用于日志输出）
@@ -176,22 +176,22 @@ def build_run_record(
     top_candidate_names = "；".join(top_names)
 
     record = {
-        "run_id": run_id,
-        "jd_title": jd.get("title", ""),
-        "jd_location": jd.get("location", ""),
-        "jd_salary_range": jd.get("salary_range", ""),
-        "candidate_count": quality_meta.get("candidate_count", 0),
-        "contact_count": _calc_contact_count(final_output),
-        "top_candidate_names": top_candidate_names,
-        "quality_score": quality_meta.get("quality_score", 0),
-        "quality_flag": quality_meta.get("quality_flag", ""),
-        "identity_conflict_count": quality_meta.get("identity_conflict_count", 0),
-        "avg_score": round(quality_meta.get("avg_score", 0), 2),
-        "output_version": "v1",  # TalentFlow 当前版本标记
-        "owner_summary": owner_summary[:5000] if owner_summary else "",  # 截断防超限
-        "batch_input_path": batch_input_path,
-        "final_output_path": final_output_path,
-        "created_at": now_ms(),
+        "批次ID": run_id,
+        "JD标题": jd.get("title", ""),
+        "JD地点": jd.get("location", ""),
+        "JD薪资范围": jd.get("salary_range", ""),
+        "候选人数": quality_meta.get("candidate_count", 0),
+        "建议联系人数": _calc_contact_count(final_output),
+        "Top候选人": top_candidate_names,
+        "质量分": quality_meta.get("quality_score", 0),
+        "质量标记": quality_meta.get("quality_flag", ""),
+        "身份冲突数": quality_meta.get("identity_conflict_count", 0),
+        "平均分": round(quality_meta.get("avg_score", 0), 2),
+        "输出版本": "v1",
+        "批次摘要": owner_summary[:5000] if owner_summary else "",
+        "batch_input路径": batch_input_path,
+        "final_output路径": final_output_path,
+        "创建时间": now_ms(),
     }
     return record
 
@@ -320,52 +320,48 @@ def build_candidate_records(
 
         record = {
             # 基础识别
-            "run_id": run_id,
-            "candidate_id": candidate_id,
-            "candidate_name": c.get("candidate_name", ""),
-            "canonical_name": im.get("canonical_name", c.get("candidate_name", "")),
-            "role_label": c.get("role_label", ""),
-            "source_platform": source_platform,
-            "source_file_name": source_file_name,
-            "resume_link": resume_link,
+            "批次ID": run_id,
+            "候选人ID": candidate_id,
+            "候选人姓名": c.get("candidate_name", ""),
+            "规范姓名": im.get("canonical_name", c.get("candidate_name", "")),
+            "角色标签": c.get("role_label", ""),
+            "来源平台": source_platform,
+            "原始文件名": source_file_name,
+            "简历链接": resume_link,
             # AI 决策主字段
-            "rank": c.get("rank", 0),
-            "total_score": round(c.get("total_score", 0), 2),
-            "decision": c.get("decision", ""),
-            "priority": c.get("priority", ""),
-            "action_timing": c.get("action_timing", ""),
-            "should_contact": action.get("should_contact", False),
-            "core_judgement": c.get("core_judgement", ""),
-            "reasons": array_to_text(c.get("reasons", [])),
-            "risks": array_to_text(c.get("risks", [])),
-            "verification_question": action.get("verification_question", ""),
-            "hook_message": action.get("hook_message", ""),
-            "message_template": action.get("message_template", ""),
+            "排名": c.get("rank", 0),
+            "综合评分": round(c.get("total_score", 0), 2),
+            "决策结论": c.get("decision", ""),
+            "优先级": c.get("priority", ""),
+            "行动时机": c.get("action_timing", ""),
+            "建议联系": action.get("should_contact", False),
+            "核心判断": c.get("core_judgement", ""),
+            "推荐理由": array_to_text(c.get("reasons", [])),
+            "风险提示": array_to_text(c.get("risks", [])),
+            "核实问题": action.get("verification_question", ""),
+            "钩子消息": action.get("hook_message", ""),
+            "联系话术模板": action.get("message_template", ""),
             # 7维评分
-            "hard_skill_match": round(ds.get("hard_skill_match", 0), 2),
-            "experience_depth": round(ds.get("experience_depth", 0), 2),
-            "innovation_potential": round(ds.get("innovation_potential", 0), 2),
-            "execution_goal_breakdown": round(ds.get("execution_goal_breakdown", 0), 2),
-            "team_fit": round(ds.get("team_fit", 0), 2),
-            "willingness": round(ds.get("willingness", 0), 2),
-            "stability": round(ds.get("stability", 0), 2),
-            "template_id": ss.get("template_id", ""),
-            "weighted_total": round(ss.get("weighted_total", 0), 2),
-            "dimension_evidence_summary": dimension_evidence_summary[:3000],  # 截断防超限
+            "硬技能匹配": round(ds.get("hard_skill_match", 0), 2),
+            "经验深度": round(ds.get("experience_depth", 0), 2),
+            "创新潜能": round(ds.get("innovation_potential", 0), 2),
+            "目标拆解执行": round(ds.get("execution_goal_breakdown", 0), 2),
+            "团队融合": round(ds.get("team_fit", 0), 2),
+            "意愿度": round(ds.get("willingness", 0), 2),
+            "稳定性": round(ds.get("stability", 0), 2),
+            "模板ID": ss.get("template_id", ""),
+            "加权总分": round(ss.get("weighted_total", 0), 2),
+            "证据摘要": dimension_evidence_summary[:3000],
             # 质量与身份
-            "has_identity_conflict": bool(im.get("has_conflict", False)),
-            "identity_resolution": identity_resolution,
-            "conflict_fields": array_to_text(im.get("conflict_fields", [])),
-            "quality_note": _generate_quality_note(c, c.get("total_score", 0)),
-            # 人工跟进字段（预留，值留空由HR填写）
-            "follow_up_status": "",
-            "hr_owner": "",
-            "hr_comment": "",
-            "interview_result": "",
-            "reject_reason": "",
-            "manual_priority": "",
-            "manual_override_note": "",
-            "final_outcome": "",
+            "身份冲突": bool(im.get("has_conflict", False)),
+            "身份处理方案": identity_resolution,
+            "冲突字段": array_to_text(im.get("conflict_fields", [])),
+            "质量备注": _generate_quality_note(c, c.get("total_score", 0)),
+            # 人工跟进字段（预留，不覆盖）
+            "跟进状态": "",
+            "HR备注": "",
+            "面试结果": "",
+            "最终结果": "",
         }
         records.append(record)
 
