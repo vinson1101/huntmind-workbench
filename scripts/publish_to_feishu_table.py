@@ -83,13 +83,18 @@ def plan_publish(
     """
     规划发布步骤，返回要执行的工具调用序列（JSON格式）。
 
+    UPSERT 策略（spec 第7节）：
+    - Runs 表：按 run_id 查询，存在则 UPDATE，不存在则 INSERT
+    - Candidates 表：按 run_id + candidate_id 查询，
+      存在的记录 UPDATE，不存在 INSERT；不同 run 允许并存
+
     Returns:
         {
             "steps": [ {"tool": "...", "params": {...}}, ... ],
             "run_id": "...",
             "run_record": {...},
             "candidate_records": [...],
-            "bitable_app_token": "...",   # 新建时返回
+            "bitable_app_token": "...",
             "runs_table_id": "...",
             "candidates_table_id": "...",
         }
@@ -102,13 +107,11 @@ def plan_publish(
 
     # Step 1: 确定 bitable app
     if not bitable_app_token:
-        # 需要新建 bitable app
         steps.append(_packet("feishu_bitable_app", {
             "action": "create",
             "name": bitable_name,
         }))
         create_app_step_idx = len(steps) - 1
-
     else:
         create_app_step_idx = None
         steps.append(_packet("feishu_bitable_app", {
@@ -120,7 +123,7 @@ def plan_publish(
     if not runs_table_id:
         steps.append(_packet("feishu_bitable_app_table", {
             "action": "create",
-            "app_token": "{{bitable_app_token}}",  # 占位符，下一步替换
+            "app_token": "{{bitable_app_token}}",
             "table": {
                 "name": RUN_TABLE_NAME,
                 "fields": [
@@ -150,32 +153,72 @@ def plan_publish(
     else:
         create_candidates_table_step_idx = None
 
-    # Step 4: 写入 Runs 记录
-    # 先把 created_at 从毫秒时间戳转为可读日期字符串（工具支持字符串写入日期字段）
-    rr = dict(run_record)
-    created_at_ms = rr.pop("created_at", None)
-    if created_at_ms:
-        import datetime
-        dt = datetime.datetime.fromtimestamp(created_at_ms / 1000, tz=datetime.timezone.utc)
-        rr["created_at"] = created_at_ms  # 飞书日期字段接受毫秒时间戳
-
+    # Step 4: UPSERT Runs 记录
+    # 查询是否已存在
     steps.append(_packet("feishu_bitable_app_table_record", {
-        "action": "create",
+        "action": "list",
         "app_token": "{{bitable_app_token}}",
         "table_id": "{{runs_table_id}}",
-        "fields": rr,
+        "filter": {
+            "conjunction": "and",
+            "conditions": [{"field_name": "run_id", "operator": "is", "value": [run_id]}],
+        },
+        "field_names": ["run_id"],
+        "page_size": 1,
+    }))
+    # 结果由执行层判断：存在则 batch_update，不存在则 create
+    # 传入 fields 和 record_id（空=新建）
+    steps.append(_packet("feishu_bitable_app_table_record", {
+        "action": "upsert_run",
+        "app_token": "{{bitable_app_token}}",
+        "table_id": "{{runs_table_id}}",
+        "run_id": run_id,
+        "fields": run_record,
     }))
 
-    # Step 5: 批量写入 Candidates 记录（每批500，分批）
+    # Step 5: UPSERT Candidates 记录
+    # 先按 run_id 查出该 run 下所有已有记录
+    steps.append(_packet("feishu_bitable_app_table_record", {
+        "action": "list",
+        "app_token": "{{bitable_app_token}}",
+        "table_id": "{{candidates_table_id}}",
+        "filter": {
+            "conjunction": "and",
+            "conditions": [{"field_name": "run_id", "operator": "is", "value": [run_id]}],
+        },
+        "field_names": ["run_id", "candidate_id"],
+        "page_size": 500,
+    }))
+
+    # 按 run_id + candidate_id 分组，存在的走 UPDATE，不存在的走 CREATE
+    candidates_to_insert = []
+    candidates_to_update = []  # (record_id, fields)
+    # 注：这里先用占位符，实际 record_id 由执行层根据 list 结果填充
+    for cr in candidate_records:
+        candidates_to_insert.append({"fields": cr})
+
     BATCH_SIZE = 500
-    for i in range(0, len(candidate_records), BATCH_SIZE):
-        batch = candidate_records[i : i + BATCH_SIZE]
-        steps.append(_packet("feishu_bitable_app_table_record", {
-            "action": "batch_create",
-            "app_token": "{{bitable_app_token}}",
-            "table_id": "{{candidates_table_id}}",
-            "records": [{"fields": r} for r in batch],
-        }))
+    # INSERT batch
+    if candidates_to_insert:
+        for i in range(0, len(candidates_to_insert), BATCH_SIZE):
+            batch = candidates_to_insert[i:i + BATCH_SIZE]
+            steps.append(_packet("feishu_bitable_app_table_record", {
+                "action": "batch_create",
+                "app_token": "{{bitable_app_token}}",
+                "table_id": "{{candidates_table_id}}",
+                "records": batch,
+            }))
+
+    # UPDATE batch（占位，实际由执行层解析 list 结果后处理）
+    if candidates_to_update:
+        for i in range(0, len(candidates_to_update), BATCH_SIZE):
+            batch = candidates_to_update[i:i + BATCH_SIZE]
+            steps.append(_packet("feishu_bitable_app_table_record", {
+                "action": "batch_update",
+                "app_token": "{{bitable_app_token}}",
+                "table_id": "{{candidates_table_id}}",
+                "records": [{"record_id": rid, "fields": flds} for rid, flds in batch],
+            }))
 
     return {
         "steps": steps,

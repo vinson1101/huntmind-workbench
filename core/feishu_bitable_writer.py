@@ -118,8 +118,8 @@ FIELD_TYPE_NAMES = {
 # 数据转换工具
 # ---------------------------------------------------------------------------
 
-def array_to_text(arr: Any, separator: str = "\n") -> str:
-    """将列表转为分隔符分隔的文本，用于表格展示。"""
+def array_to_text(arr: Any, separator: str = "；") -> str:
+    """将列表转为分隔符分隔的文本，用于表格展示（spec 默认用 ； 分隔）。"""
     if not arr:
         return ""
     if isinstance(arr, list):
@@ -169,14 +169,11 @@ def build_run_record(
     Returns:
         符合 Runs 表字段的 dict，key=field_name，value=字段值
     """
-    # top_recommendations 中 priority=A 的人（来自 final_output.json）
+    # top_recommendations 中排名前 3~5 名（spec: 取前 3~5 名）
     top_recs = (final_output or {}).get("top_recommendations", [])
-    top_names = [
-        c.get("candidate_name", "")
-        for c in top_recs
-        if c.get("priority") == "A"
-    ]
-    top_candidate_names = array_to_text(top_names, separator=", ")
+    top_3_5 = top_recs[:5]  # 取前5名
+    top_names = [c.get("candidate_name", "") for c in top_3_5]
+    top_candidate_names = "；".join(top_names)
 
     record = {
         "run_id": run_id,
@@ -184,7 +181,7 @@ def build_run_record(
         "jd_location": jd.get("location", ""),
         "jd_salary_range": jd.get("salary_range", ""),
         "candidate_count": quality_meta.get("candidate_count", 0),
-        "contact_count": _calc_contact_count(quality_meta),
+        "contact_count": _calc_contact_count(final_output),
         "top_candidate_names": top_candidate_names,
         "quality_score": quality_meta.get("quality_score", 0),
         "quality_flag": quality_meta.get("quality_flag", ""),
@@ -199,13 +196,48 @@ def build_run_record(
     return record
 
 
-def _calc_contact_count(quality_meta: Dict[str, Any]) -> int:
-    """计算应该联系的人数。"""
-    # 从 top_recommendations 中筛选 decision 包含 yes/strong_yes 且 should_contact=true
-    # 但 quality_meta 没有这个细分，用 contact_ratio 估算
-    count = quality_meta.get("candidate_count", 0)
-    ratio = quality_meta.get("contact_ratio", 0.5)
-    return int(round(count * ratio))
+def _generate_quality_note(
+    c: Dict[str, Any],
+    total_score: float,
+) -> str:
+    """
+    根据 spec 第9节规则自动生成 quality_note。
+    - identity conflict 提示
+    - 文案分数不同步检测（core_judgement 中提的分数 vs total_score）
+    - evidence 占位检测
+    """
+    notes = []
+    im = c.get("identity_meta", {})
+    de = c.get("structured_score", {}).get("dimension_evidence", {})
+
+    # 9.1 identity 冲突
+    if im.get("has_conflict") is True:
+        name = c.get("candidate_name", "候选人")
+        notes.append(f"identity conflict: {name} 存在身份冲突")
+
+    # 9.2 文案分数不同步（core_judgement 中提的分数 vs total_score）
+    judgment = c.get("core_judgement", "")
+    import re as _re
+    scores_in_judgment = _re.findall(r"(\d+(?:\.\d+)?)\s*分", judgment)
+    if scores_in_judgment:
+        judgment_score = float(scores_in_judgment[0])
+        if abs(judgment_score - total_score) > 1.0:
+            notes.append("judgement score mismatch")
+
+    # 9.3 evidence 明显占位检测
+    generic_pattern = _re.compile(r"^[\u4e00-\u9fa5a-zA-Z_]+\u7ef4\u5ea6\u8bc4\u4f30$")
+    for k, v in de.items():
+        if v and generic_pattern.match(str(v).strip()):
+            notes.append("dimension evidence too generic")
+            break
+
+    return "；".join(notes)
+
+
+def _calc_contact_count(final_output: Dict[str, Any]) -> int:
+    """统计 final_output 中 should_contact=true 的人数（spec 要求）。"""
+    recs = final_output.get("top_recommendations", [])
+    return sum(1 for r in recs if r.get("action", {}).get("should_contact") is True)
 
 
 # ---------------------------------------------------------------------------
@@ -238,26 +270,36 @@ def build_candidate_records(
     for c in candidates_out:
         candidate_id = c.get("candidate_id", "")
 
-        # 从 batch_input 获取原始文件名字段
+        # 从 batch_input 按 candidate_id 查找对应记录（spec: 优先 candidate_id 匹配）
         in_c = in_map.get(candidate_id, {})
-        raw_resume = in_c.get("raw_resume", {})
-        ingestion_meta = in_c.get("ingestion_meta", {})
+        # fallback: 用 candidate_name 匹配
+        if not in_c:
+            for c2 in batch_input.get("candidates", []):
+                if c2.get("name") == c.get("candidate_name"):
+                    in_c = c2
+                    break
 
-        # source_file_name 优先从 ingestion_meta 读
-        source_file_name = ingestion_meta.get("original_file_name", "") or raw_resume.get("source", {}).get("file_name", "")
+        src = in_c.get("source", {})
+        source_platform = src.get("platform", "")
+        source_file_name = src.get("file_name", "")
 
         # structured_score
         ss = c.get("structured_score", {})
         ds = ss.get("dimension_scores", {})
         de = ss.get("dimension_evidence", {})
 
-        # 7维 evidence 拼接成一段文本
-        dim_keys = [
-            "hard_skill_match", "experience_depth", "innovation_potential",
-            "execution_goal_breakdown", "team_fit", "willingness", "stability"
-        ]
-        evidence_parts = [f"[{k}] {de.get(k, '')}" for k in dim_keys if de.get(k)]
-        dimension_evidence_summary = "\n".join(evidence_parts)
+        # 7维 evidence 拼接（spec: 硬技能：...；经验深度：...）
+        dim_labels = {
+            "hard_skill_match": "硬技能",
+            "experience_depth": "经验深度",
+            "innovation_potential": "创新潜能",
+            "execution_goal_breakdown": "目标拆解执行",
+            "team_fit": "团队融合",
+            "willingness": "意愿度",
+            "stability": "稳定性",
+        }
+        evidence_parts = [f"{dim_labels[k]}：{de.get(k, '')}" for k in dim_labels.keys() if de.get(k)]
+        dimension_evidence_summary = "；".join(evidence_parts)
 
         # identity_meta
         im = c.get("identity_meta", {})
@@ -273,7 +315,7 @@ def build_candidate_records(
             "candidate_name": c.get("candidate_name", ""),
             "canonical_name": im.get("canonical_name", c.get("candidate_name", "")),
             "role_label": c.get("role_label", ""),
-            "source_platform": "local",
+            "source_platform": source_platform,
             "source_file_name": source_file_name,
             # AI 决策主字段
             "rank": c.get("rank", 0),
@@ -303,7 +345,7 @@ def build_candidate_records(
             "has_identity_conflict": bool(im.get("has_conflict", False)),
             "identity_resolution": identity_resolution,
             "conflict_fields": array_to_text(im.get("conflict_fields", [])),
-            "quality_note": "",
+            "quality_note": _generate_quality_note(c, c.get("total_score", 0)),
             # 人工跟进字段（预留，值留空由HR填写）
             "follow_up_status": "",
             "hr_owner": "",
