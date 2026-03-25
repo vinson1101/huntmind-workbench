@@ -1541,27 +1541,33 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
             elif derived_decision == "strong_yes":
                 normalized_candidate["priority"] = "A"
 
-        # --- core_judgement 最小一致性清理（仅当 decision 被覆盖时） ---
-        if normalized_candidate.get("_decision_overridden"):
-            cj = normalized_candidate.get("core_judgement") or ""
-            final_d = normalized_candidate["decision"]
-            # 清除 core_judgement 中与最终 decision 矛盾的"建议联系/建议不推进"类表述
-            if final_d == "no" and ("建议联系" in cj or "优先联系" in cj or "值得联系" in cj):
-                normalized_candidate["core_judgement"] = (
-                    f"{candidate_name or '该候选人'}与目标岗位在当前招聘条件下不满足推进条件，"
-                    f"match_fit={normalized_candidate.get('match_fit')}，recruitability={normalized_candidate.get('recruitability')}，不建议推进。"
-                )
-            elif final_d in ("strong_yes", "yes") and ("不建议" in cj or "暂不推进" in cj or "不推荐" in cj):
-                # 弱化为客观描述
-                normalized_candidate["core_judgement"] = (
-                    f"{candidate_name or '该候选人'}综合评分{total_score:.1f}分，"
-                    f"match_fit={normalized_candidate.get('match_fit')}，recruitability={normalized_candidate.get('recruitability')}，建议推进。"
-                )
+        # --- 硬规则守门：hard_mismatch 强制压 decision=no（最早执行，防止后续 tone cleanup 用错误 decision 误判）---
+        normalized_candidate = _apply_hard_mismatch_guard(normalized_candidate)
+
+        # --- core_judgement 语气一致性清理（任何场景都执行，在 guard 之后） ---
+        cj = normalized_candidate.get("core_judgement") or ""
+        final_d = normalized_candidate["decision"]
+
+        # yes/strong_yes：不应出现"备选/暂不推进/不建议"等消极措辞
+        if final_d in ("strong_yes", "yes") and any(kw in cj for kw in ["备选", "暂不推进", "不建议", "不推荐", "可选"]):
+            normalized_candidate["core_judgement"] = (
+                f"{candidate_name or '该候选人'}综合评分{total_score:.1f}分，"
+                f"match_fit={normalized_candidate.get('match_fit')}，recruitability={normalized_candidate.get('recruitability')}，建议推进。"
+            )
+        # no：不应出现"建议联系/优先联系/值得联系/建议本周联系/备选观察"等积极或弱化措辞
+        elif final_d == "no" and any(kw in cj for kw in ["建议联系", "优先联系", "值得联系", "建议推进", "建议本周联系", "备选观察", "可选联系", "可考虑"]):
+            normalized_candidate["core_judgement"] = (
+                f"{candidate_name or '该候选人'}与目标岗位在当前招聘条件下不满足推进条件，"
+                f"match_fit={normalized_candidate.get('match_fit')}，recruitability={normalized_candidate.get('recruitability')}，不建议推进。"
+            )
+        # maybe：不应出现"建议本周联系/优先联系/值得推进/建议优先"等强措辞
+        elif final_d == "maybe" and any(kw in cj for kw in ["建议本周联系", "优先联系", "值得推进", "建议优先"]):
+            normalized_candidate["core_judgement"] = (
+                f"{candidate_name or '该候选人'}综合评分{total_score:.1f}分，"
+                f"match_fit={normalized_candidate.get('match_fit')}，recruitability={normalized_candidate.get('recruitability')}，建议作为备选观察。"
+            )
 
         normalized_candidate["action"] = _normalize_action(normalized_candidate, candidate.get("action"))
-
-        # --- 硬规则守门：hard_mismatch 强制压 decision=no（任何场景都覆盖，在 decision mapping 之后执行）---
-        normalized_candidate = _apply_hard_mismatch_guard(normalized_candidate)
 
         # P1 identity conflict check: action fields
         action = normalized_candidate["action"]
