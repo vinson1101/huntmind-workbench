@@ -911,6 +911,91 @@ def _find_alias_hits(text: str, canonical: str, aliases: List[str]) -> List[str]
 
 
 # ==============================
+# 任务 A & B: 通用语义一致性校正
+# ==============================
+
+def _sanitize_action_consistency(candidate: Dict[str, Any], action: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    任务 A：联系文案做「通用一致性校正」，禁止伪造候选人背景。
+    基于通用信号（decision / scores / core_judgement / risks）做判断，
+    不写死任何具体岗位关键词。
+    """
+    decision = candidate.get("decision", "")
+    structured = candidate.get("structured_score") or {}
+    scores = structured.get("dimension_scores") or {}
+    hard_skill = scores.get("hard_skill_match")
+    core = str(candidate.get("core_judgement") or "")
+    risks = " ".join(str(x) for x in (candidate.get("risks") or []))
+
+    # 1) no：清除所有联系内容
+    if decision == "no":
+        action["should_contact"] = False
+        action["hook_message"] = ""
+        action["verification_question"] = ""
+        action["message_template"] = ""
+        action["deep_questions"] = []
+        return action
+
+    # 2) 低硬技能分 OR core/风险中有角色错位信号 → 改为中性表达，禁止伪造背景
+    low_match = isinstance(hard_skill, (int, float)) and hard_skill <= 20
+    mismatch_signal = any(
+        key in (core + " " + risks)
+        for key in ["不匹配", "缺乏", "不足", "转岗", "非目标岗位", "角色错位", "需验证"]
+    )
+
+    if low_match or mismatch_signal:
+        neutral_hook = "您好，我们正在招聘相关岗位，想先和您确认一下您过往项目中的实际职责与能力边界。"
+        neutral_template = (
+            "您好，我们正在招聘相关岗位。"
+            "想先和您确认一下，在您过往项目经历中，哪些部分是您亲自负责并实际落地的？"
+        )
+        neutral_verification = "在您最近一段项目经历里，哪些环节是您独立负责并真正推动结果落地的？"
+
+        action["hook_message"] = neutral_hook
+        action["verification_question"] = neutral_verification
+        action["message_template"] = neutral_template
+
+    return action
+
+
+def _sanitize_dimension_evidence(candidate: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    任务 B：dimension_evidence 做「通用一致性校正」，禁止模板污染。
+    基于通用信号（分数 / core_judgement / risks）做判断，
+    不写死任何具体岗位技能词。
+    """
+    structured = candidate.get("structured_score") or {}
+    scores = structured.get("dimension_scores") or {}
+    evidence = structured.get("dimension_evidence") or {}
+
+    core = str(candidate.get("core_judgement") or "")
+    risks = " ".join(str(x) for x in (candidate.get("risks") or []))
+    context_text = f"{core} {risks}"
+
+    positive_signal_words = ["丰富", "扎实", "熟练", "完整", "较强", "具备相关经验"]
+
+    for field, score in scores.items():
+        current = str(evidence.get(field) or "")
+
+        # 1) 分数为 0：evidence 不允许写成正向经验
+        if isinstance(score, (int, float)) and score == 0:
+            evidence[field] = "无充分相关证据支持该维度。"
+            continue
+
+        # 2) 分数很低 OR core/风险有角色错位信号，但 evidence 是明显正向表述 → 改为保守表述
+        positive_signal = any(word in current for word in positive_signal_words)
+        low_score = isinstance(score, (int, float)) and score <= 20
+        mismatch_signal = any(word in context_text for word in ["不匹配", "缺乏", "不足", "转岗", "角色错位"])
+
+        if (low_score or mismatch_signal) and positive_signal:
+            evidence[field] = "该维度存在一定相关线索，但证据不足，仍需进一步核实。"
+
+    structured["dimension_evidence"] = evidence
+    candidate["structured_score"] = structured
+    return candidate
+
+
+# ==============================
 # 2. 7维评分体系
 # ==============================
 
@@ -1353,6 +1438,15 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
             identity_meta["resolution"] = "resolved"
 
         normalized_candidate["identity_meta"] = identity_meta
+
+        # Task B: dimension_evidence 通用一致性校正（禁止模板污染）
+        normalized_candidate = _sanitize_dimension_evidence(normalized_candidate)
+
+        # Task A: action 联系文案通用一致性校正（禁止伪造背景）
+        normalized_candidate["action"] = _sanitize_action_consistency(
+            normalized_candidate, normalized_candidate["action"]
+        )
+
         sanitized.append(normalized_candidate)
 
     data["top_recommendations"] = _sort_recommendations(sanitized)
