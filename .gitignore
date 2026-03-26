@@ -55,3 +55,18 @@ Thumbs.db
 # OpenClaw specific
 .openclaw/
 feedback_loop.jsonl
+
+# Inbox — contains private resumes and PII
+inbox/
+
+# Runs output — don't commit evaluation results
+runs/outputs/
+
+# Local environment
+.env
+.env.local
+*.local.yaml
+
+# OS
+.DS_Store
+Thumbs.db
