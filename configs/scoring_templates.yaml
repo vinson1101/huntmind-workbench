@@ -74,6 +74,53 @@ templates:
       min_willingness_for_a: 40
       min_experience_for_a: 50
 
+  # ===== 市场运营序列 =====
+
+  tech_marketing_director:
+    description: 科技/互联网 市场总监 | 增长黑客/PLG/数字营销
+    weights:
+      hard_skill_match: 25
+      experience_depth: 20
+      innovation_potential: 25
+      execution_goal_breakdown: 15
+      team_fit: 5
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 50
+      min_willingness_for_a: 40
+      min_experience_for_a: 45
+
+  fintech_marketing_director:
+    description: 金融/游戏 市场总监 | 合规营销/投资者关系/品牌信任
+    weights:
+      hard_skill_match: 25
+      experience_depth: 25
+      innovation_potential: 10
+      execution_goal_breakdown: 15
+      team_fit: 10
+      willingness: 5
+      stability: 10
+    gates:
+      min_hard_skill_for_a: 50
+      min_willingness_for_a: 40
+      min_experience_for_a: 50
+
+  auto_marketing_director:
+    description: 汽车/制造 市场总监 | 渠道管理/供应商关系/品牌建设
+    weights:
+      hard_skill_match: 25
+      experience_depth: 25
+      innovation_potential: 10
+      execution_goal_breakdown: 20
+      team_fit: 10
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 50
+      min_willingness_for_a: 40
+      min_experience_for_a: 50
+
   # ===== 商务/销售序列 =====
   senior_sales_director:
     description: 销售总监 / 大客户总监（北美/跨境）
@@ -151,6 +198,25 @@ template_selection:
   - when:
       jd_title_contains_any: ["销售经理", "销售主管", "Sales Manager"]
     use: sales_director_b2b
+
+  # 市场运营序列 — 按行业分组
+  # 科技/互联网行业
+  - when:
+      jd_industry_contains_any: ["互联网", "人工智能", "芯片半导体", "软件"]
+      jd_title_contains_any: ["市场总监", "市场负责人", "品牌总监", "市场营销"]
+    use: tech_marketing_director
+
+  # 金融/游戏行业
+  - when:
+      jd_industry_contains_any: ["金融", "游戏", "咨询服务"]
+      jd_title_contains_any: ["市场总监", "市场负责人", "品牌总监", "市场营销"]
+    use: fintech_marketing_director
+
+  # 汽车/制造行业
+  - when:
+      jd_industry_contains_any: ["汽车", "智能制造", "大基建", "化工材料", "物流"]
+      jd_title_contains_any: ["市场总监", "市场负责人", "品牌总监", "市场营销"]
+    use: auto_marketing_director
 
 industry_adjustments:
   healthcare:
