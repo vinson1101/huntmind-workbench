@@ -1,15 +1,21 @@
-version: v1
+version: v2
 
 default_template: b2b_product_general
 
 templates:
-  b2b_product_general:
-    description: 标准B端产品经理
+
+  # ═══════════════════════════════════════════════
+  # 【序列：产品】
+  # ═══════════════════════════════════════════════
+
+  # — 互联网/科技
+  tech_product_manager:
+    description: 科技/互联网 产品经理 | 增长/平台/创新型产品
     weights:
-      hard_skill_match: 30
+      hard_skill_match: 25
       experience_depth: 20
-      innovation_potential: 15
-      execution_goal_breakdown: 20
+      innovation_potential: 25
+      execution_goal_breakdown: 15
       team_fit: 5
       willingness: 5
       stability: 5
@@ -17,55 +23,13 @@ templates:
       min_hard_skill_for_a: 50
       min_willingness_for_a: 40
 
-  innovation_product:
-    description: 创新型产品 / 0-1 产品
-    weights:
-      hard_skill_match: 25
-      experience_depth: 15
-      innovation_potential: 25
-      execution_goal_breakdown: 20
-      team_fit: 5
-      willingness: 5
-      stability: 5
-    gates:
-      min_hard_skill_for_a: 50
-      min_willingness_for_a: 40
-
-  transition_to_product:
-    description: 项目/实施/解决方案转产品
-    weights:
-      hard_skill_match: 25
-      experience_depth: 15
-      innovation_potential: 10
-      execution_goal_breakdown: 25
-      team_fit: 5
-      willingness: 10
-      stability: 10
-    gates:
-      min_hard_skill_for_a: 45
-      min_willingness_for_a: 40
-
-  campus_product:
-    description: 校招 / 应届产品
-    weights:
-      hard_skill_match: 30
-      experience_depth: 0
-      innovation_potential: 25
-      execution_goal_breakdown: 20
-      team_fit: 10
-      willingness: 10
-      stability: 5
-    gates:
-      min_hard_skill_for_a: 50
-      min_willingness_for_a: 45
-
-  senior_product_complex:
-    description: 高级产品经理 / 复杂业务产品
+  tech_senior_product:
+    description: 科技/互联网 高级产品经理 | 复杂业务/0-1/创新
     weights:
       hard_skill_match: 30
       experience_depth: 25
-      innovation_potential: 15
-      execution_goal_breakdown: 15
+      innovation_potential: 20
+      execution_goal_breakdown: 10
       team_fit: 5
       willingness: 5
       stability: 5
@@ -74,15 +38,30 @@ templates:
       min_willingness_for_a: 40
       min_experience_for_a: 50
 
-  # ===== 市场运营序列 =====
-
-  tech_marketing_director:
-    description: 科技/互联网 市场总监 | 增长黑客/PLG/数字营销
+  # — 金融/游戏
+  fintech_product_manager:
+    description: 金融/游戏 产品经理 | 合规/交易/机构产品
     weights:
-      hard_skill_match: 25
-      experience_depth: 20
-      innovation_potential: 25
+      hard_skill_match: 30
+      experience_depth: 25
+      innovation_potential: 10
       execution_goal_breakdown: 15
+      team_fit: 10
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 55
+      min_willingness_for_a: 40
+      min_experience_for_a: 50
+
+  # — 汽车/制造
+  auto_product_manager:
+    description: 汽车/制造 产品经理 | 供应链/制造业/项目交付
+    weights:
+      hard_skill_match: 30
+      experience_depth: 25
+      innovation_potential: 10
+      execution_goal_breakdown: 20
       team_fit: 5
       willingness: 5
       stability: 5
@@ -91,23 +70,105 @@ templates:
       min_willingness_for_a: 40
       min_experience_for_a: 45
 
-  fintech_marketing_director:
-    description: 金融/游戏 市场总监 | 合规营销/投资者关系/品牌信任
+  # — 消费/商业
+  consumer_product_manager:
+    description: 消费品/零售 产品经理 | 渠道/品牌/消费者洞察
     weights:
       hard_skill_match: 25
+      experience_depth: 20
+      innovation_potential: 20
+      execution_goal_breakdown: 20
+      team_fit: 5
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 45
+      min_willingness_for_a: 40
+
+  # — 战略/新兴（医疗/能源/农业）
+  emerging_product_manager:
+    description: 医疗/能源/新兴行业 产品经理 | 政策敏感/研发驱动
+    weights:
+      hard_skill_match: 30
+      experience_depth: 25
+      innovation_potential: 15
+      execution_goal_breakdown: 15
+      team_fit: 5
+      willingness: 10
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 55
+      min_willingness_for_a: 45
+      min_experience_for_a: 50
+
+  # ═══════════════════════════════════════════════
+  # 【序列：研发/技术】
+  # ═══════════════════════════════════════════════
+
+  tech_rd_engineer:
+    description: 科技/互联网 研发工程师 | 算法/架构/增长技术
+    weights:
+      hard_skill_match: 35
+      experience_depth: 20
+      innovation_potential: 20
+      execution_goal_breakdown: 15
+      team_fit: 5
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 55
+      min_willingness_for_a: 40
+
+  fintech_rd_engineer:
+    description: 金融/游戏 研发工程师 | 高并发/交易系统/安全
+    weights:
+      hard_skill_match: 35
       experience_depth: 25
       innovation_potential: 10
       execution_goal_breakdown: 15
-      team_fit: 10
+      team_fit: 5
       willingness: 5
-      stability: 10
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 55
+      min_willingness_for_a: 40
+      min_experience_for_a: 50
+
+  auto_rd_engineer:
+    description: 汽车/制造 研发工程师 | 嵌入式/硬件/工艺
+    weights:
+      hard_skill_match: 35
+      experience_depth: 25
+      innovation_potential: 10
+      execution_goal_breakdown: 15
+      team_fit: 5
+      willingness: 5
+      stability: 5
     gates:
       min_hard_skill_for_a: 50
       min_willingness_for_a: 40
       min_experience_for_a: 50
 
-  auto_marketing_director:
-    description: 汽车/制造 市场总监 | 渠道管理/供应商关系/品牌建设
+  # ═══════════════════════════════════════════════
+  # 【序列：运营】
+  # ═══════════════════════════════════════════════
+
+  tech_ops_manager:
+    description: 科技/互联网 运营经理 | 增长运营/用户运营/内容运营
+    weights:
+      hard_skill_match: 25
+      experience_depth: 20
+      innovation_potential: 20
+      execution_goal_breakdown: 20
+      team_fit: 5
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 45
+      min_willingness_for_a: 40
+
+  fintech_ops_manager:
+    description: 金融/游戏 运营经理 | 合规运营/风险运营/客户服务
     weights:
       hard_skill_match: 25
       experience_depth: 25
@@ -121,9 +182,27 @@ templates:
       min_willingness_for_a: 40
       min_experience_for_a: 50
 
-  # ===== 商务/销售序列 =====
-  senior_sales_director:
-    description: 销售总监 / 大客户总监（北美/跨境）
+  auto_ops_manager:
+    description: 汽车/制造 运营经理 | 供应链运营/生产管理/质量运营
+    weights:
+      hard_skill_match: 30
+      experience_depth: 25
+      innovation_potential: 10
+      execution_goal_breakdown: 20
+      team_fit: 5
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 50
+      min_willingness_for_a: 40
+      min_experience_for_a: 45
+
+  # ═══════════════════════════════════════════════
+  # 【序列：商务/销售】
+  # ═══════════════════════════════════════════════
+
+  tech_sales_director:
+    description: 科技/互联网 销售总监 | toB大客户/渠道管理
     weights:
       hard_skill_match: 30
       experience_depth: 25
@@ -137,105 +216,213 @@ templates:
       min_willingness_for_a: 45
       min_experience_for_a: 50
 
-  sales_director_b2b:
-    description: B2B销售总监 / 行业销售总监
+  senior_sales_director:
+    description: 汽车/金融 销售总监 | 北美大客户/战略合作
     weights:
       hard_skill_match: 30
-      experience_depth: 20
+      experience_depth: 25
       innovation_potential: 10
-      execution_goal_breakdown: 20
+      execution_goal_breakdown: 15
       team_fit: 5
       willingness: 10
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 55
+      min_willingness_for_a: 45
+      min_experience_for_a: 50
+
+  consumer_sales_director:
+    description: 消费品/零售 销售总监 | 渠道拓展/品牌代理/经销商管理
+    weights:
+      hard_skill_match: 25
+      experience_depth: 25
+      innovation_potential: 10
+      execution_goal_breakdown: 25
+      team_fit: 5
+      willingness: 5
       stability: 5
     gates:
       min_hard_skill_for_a: 50
       min_willingness_for_a: 40
+      min_experience_for_a: 45
 
-  key_account_manager:
-    description: 大客户销售经理 / 客户经理
+  # ═══════════════════════════════════════════════
+  # 【序列：职能（HR/财务/法务）】
+  # ═══════════════════════════════════════════════
+
+  tech_hr_director:
+    description: 科技/互联网 HR总监 | 组织发展/文化/COE
     weights:
       hard_skill_match: 25
-      experience_depth: 20
-      innovation_potential: 10
-      execution_goal_breakdown: 25
-      team_fit: 5
-      willingness: 10
+      experience_depth: 25
+      innovation_potential: 20
+      execution_goal_breakdown: 15
+      team_fit: 10
+      willingness: 5
       stability: 5
     gates:
-      min_hard_skill_for_a: 45
+      min_hard_skill_for_a: 50
       min_willingness_for_a: 40
+      min_experience_for_a: 50
+
+  fintech_finance_director:
+    description: 金融/游戏 财务总监 | 风险管理/合规/投资者关系
+    weights:
+      hard_skill_match: 30
+      experience_depth: 30
+      innovation_potential: 5
+      execution_goal_breakdown: 15
+      team_fit: 5
+      willingness: 5
+      stability: 5
+    gates:
+      min_hard_skill_for_a: 60
+      min_willingness_for_a: 40
+      min_experience_for_a: 55
+
+
+# ═══════════════════════════════════════════════
+# 模板选择规则
+# 优先级：行业+职位双重匹配 > 纯职位匹配 > 候选人角色匹配
+# ═══════════════════════════════════════════════
 
 template_selection:
+
+  # — 产品序列 —
+
+  # 互联网/科技 × 产品
   - when:
-      jd_title_contains_any: ["高级产品经理"]
-    use: senior_product_complex
+      jd_industry_contains_any: ["互联网", "人工智能", "芯片半导体", "软件"]
+      jd_title_contains_any: ["高级产品经理", "资深产品经理"]
+    use: tech_senior_product
 
   - when:
-      jd_title_contains_any: ["产品经理", "B端产品经理"]
+      jd_industry_contains_any: ["互联网", "人工智能", "芯片半导体", "软件"]
+      jd_title_contains_any: ["产品经理", "产品负责人"]
+    use: tech_product_manager
+
+  # 金融/游戏 × 产品
+  - when:
+      jd_industry_contains_any: ["金融", "游戏", "咨询服务"]
+      jd_title_contains_any: ["产品经理", "高级产品经理"]
+    use: fintech_product_manager
+
+  # 汽车/制造 × 产品
+  - when:
+      jd_industry_contains_any: ["汽车", "智能制造", "大基建", "化工材料", "物流"]
+      jd_title_contains_any: ["产品经理", "产品工程师"]
+    use: auto_product_manager
+
+  # 消费品 × 产品
+  - when:
+      jd_industry_contains_any: ["消费品", "文旅", "消费电子"]
+      jd_title_contains_any: ["产品经理", "品牌产品"]
+    use: consumer_product_manager
+
+  # 医疗/能源/新兴 × 产品
+  - when:
+      jd_industry_contains_any: ["大健康", "能源环保农业"]
+      jd_title_contains_any: ["产品经理", "高级产品经理"]
+    use: emerging_product_manager
+
+  # — 研发序列 —
+
+  - when:
+      jd_industry_contains_any: ["互联网", "人工智能", "软件"]
+      jd_title_contains_any: ["研发", "工程师", "算法", "架构师", "开发"]
+    use: tech_rd_engineer
+
+  - when:
+      jd_industry_contains_any: ["金融", "游戏"]
+      jd_title_contains_any: ["研发", "工程师", "量化", "交易系统"]
+    use: fintech_rd_engineer
+
+  - when:
+      jd_industry_contains_any: ["汽车", "智能制造", "芯片半导体"]
+      jd_title_contains_any: ["研发", "工程师", "硬件", "嵌入式", "工艺"]
+    use: auto_rd_engineer
+
+  # — 运营序列 —
+
+  - when:
+      jd_industry_contains_any: ["互联网", "人工智能", "软件"]
+      jd_title_contains_any: ["运营", "增长", "用户运营", "内容运营"]
+    use: tech_ops_manager
+
+  - when:
+      jd_industry_contains_any: ["金融", "游戏"]
+      jd_title_contains_any: ["运营", "合规运营", "风险运营", "客服"]
+    use: fintech_ops_manager
+
+  - when:
+      jd_industry_contains_any: ["汽车", "智能制造", "物流"]
+      jd_title_contains_any: ["运营", "供应链运营", "生产运营", "质量运营"]
+    use: auto_ops_manager
+
+  # — 商务/销售序列 —
+
+  - when:
+      jd_industry_contains_any: ["互联网", "人工智能", "软件"]
+      jd_title_contains_any: ["销售总监", "商务总监", "渠道总监", "Sales Director"]
+    use: tech_sales_director
+
+  - when:
+      jd_industry_contains_any: ["汽车", "智能制造", "金融"]
+      jd_title_contains_any: ["销售总监", "大客户总监", "Sales Director"]
+    use: senior_sales_director
+
+  - when:
+      jd_industry_contains_any: ["消费品", "文旅", "物流"]
+      jd_title_contains_any: ["销售总监", "渠道总监", "代理", "经销商"]
+    use: consumer_sales_director
+
+  # — 职能序列 —
+
+  - when:
+      jd_industry_contains_any: ["互联网", "人工智能", "软件"]
+      jd_title_contains_any: ["HR总监", "人力资源总监", "组织发展", "HRD"]
+    use: tech_hr_director
+
+  - when:
+      jd_industry_contains_any: ["金融", "游戏"]
+      jd_title_contains_any: ["财务总监", "CFO", "风控总监", "合规总监"]
+    use: fintech_finance_director
+
+  # — 通用兜底（无行业信息时）—
+
+  - when:
+      jd_title_contains_any: ["高级产品经理", "资深产品经理", "产品专家"]
+    use: tech_senior_product
+
+  - when:
+      jd_title_contains_any: ["产品经理", "B端产品", "C端产品", "产品负责人"]
     use: b2b_product_general
+
+  - when:
+      jd_title_contains_any: ["研发", "工程师", "开发", "算法"]
+    use: tech_rd_engineer
+
+  - when:
+      jd_title_contains_any: ["销售总监", "大客户总监", "Sales Director", "商务总监"]
+    use: senior_sales_director
+
+  - when:
+      jd_title_contains_any: ["运营", "增长", "用户运营"]
+    use: tech_ops_manager
 
   - when:
       jd_title_contains_any: ["产品助理", "校招", "应届"]
     use: campus_product
 
   - when:
-      jd_title_contains_any: ["创新产品经理", "0-1产品经理", "新业务产品"]
-    use: innovation_product
-
-  - when:
-      candidate_role_contains_any: ["项目经理", "实施工程师", "解决方案工程师", "顾问"]
+      candidate_role_contains_any: ["项目经理", "实施工程师", "解决方案"]
     use: transition_to_product
 
-  # 商务/销售序列
-  - when:
-      jd_title_contains_any: ["销售总监", "Sales Director", "大客户总监", "渠道总监", "商务总监"]
-    use: senior_sales_director
-
-  - when:
-      jd_title_contains_any: ["大客户经理", "客户经理", "Key Account", "KA经理", "行业销售"]
-    use: key_account_manager
-
-  - when:
-      jd_title_contains_any: ["销售经理", "销售主管", "Sales Manager"]
-    use: sales_director_b2b
-
-  # 市场运营序列 — 按行业分组
-  # 科技/互联网行业
-  - when:
-      jd_industry_contains_any: ["互联网", "人工智能", "芯片半导体", "软件"]
-      jd_title_contains_any: ["市场总监", "市场负责人", "品牌总监", "市场营销"]
-    use: tech_marketing_director
-
-  # 金融/游戏行业
-  - when:
-      jd_industry_contains_any: ["金融", "游戏", "咨询服务"]
-      jd_title_contains_any: ["市场总监", "市场负责人", "品牌总监", "市场营销"]
-    use: fintech_marketing_director
-
-  # 汽车/制造行业
-  - when:
-      jd_industry_contains_any: ["汽车", "智能制造", "大基建", "化工材料", "物流"]
-      jd_title_contains_any: ["市场总监", "市场负责人", "品牌总监", "市场营销"]
-    use: auto_marketing_director
+# ═══════════════════════════════════════════════
+# 行业调整参数
+# ═══════════════════════════════════════════════
 
 industry_adjustments:
-  healthcare:
-    add:
-      hard_skill_match: 5
-      experience_depth: 5
-
-  innovation_heavy:
-    add:
-      innovation_potential: 5
-      execution_goal_breakdown: 5
-      experience_depth: -5
-      stability: -5
-
-  delivery_heavy:
-    add:
-      execution_goal_breakdown: 5
-      team_fit: 5
-      innovation_potential: -5
 
   automotive:
     add:
@@ -250,3 +437,22 @@ industry_adjustments:
       willingness: 10
       stability: 5
       hard_skill_match: -5
+
+  healthcare:
+    add:
+      hard_skill_match: 5
+      experience_depth: 5
+      stability: 5
+
+  innovation_heavy:
+    add:
+      innovation_potential: 5
+      execution_goal_breakdown: 5
+      experience_depth: -5
+      stability: -5
+
+  delivery_heavy:
+    add:
+      execution_goal_breakdown: 5
+      team_fit: 5
+      innovation_potential: -5
