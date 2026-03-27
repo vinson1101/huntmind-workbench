@@ -1,12 +1,12 @@
 import ast
 import json
 import re
-import yaml
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .sequence_identifier import identify_sequence
+from enhancement.local_provider import LocalEnhancementProvider
+from .sequence_identifier import identify_sequence_with_meta
 
 LOG_FILE = "feedback_loop.jsonl"
 
@@ -1091,8 +1091,7 @@ def _sanitize_dimension_evidence(candidate: Dict[str, Any]) -> Dict[str, Any]:
 # 2. 7维评分体系
 # ==============================
 
-# 全局缓存
-_TEMPLATES_CACHE: Optional[Dict[str, Any]] = None
+_ENHANCEMENT_PROVIDER = LocalEnhancementProvider()
 
 DIMENSIONS_7 = [
     "hard_skill_match",
@@ -1106,17 +1105,8 @@ DIMENSIONS_7 = [
 
 
 def _load_scoring_templates() -> Dict[str, Any]:
-    """加载评分模板配置（全局缓存）。"""
-    global _TEMPLATES_CACHE
-    if _TEMPLATES_CACHE is not None:
-        return _TEMPLATES_CACHE
-    template_path = Path(__file__).parent.parent / "configs" / "scoring_templates.yaml"
-    if template_path.exists():
-        with open(template_path, encoding="utf-8") as f:
-            _TEMPLATES_CACHE = yaml.safe_load(f)
-    else:
-        _TEMPLATES_CACHE = {"templates": {}, "default_template": "b2b_product_general"}
-    return _TEMPLATES_CACHE
+    """Load scoring templates through the enhancement-layer stub."""
+    return _ENHANCEMENT_PROVIDER.get_template_rules()
 
 
 def _get_jd_text(input_data: Dict[str, Any]) -> str:
@@ -1166,8 +1156,8 @@ def _select_scoring_template(
     elif isinstance(jd, str):
         jd_title = jd
 
-    # 用序列识别器自动判断
-    template_id = identify_sequence(jd_title)
+    route_meta = identify_sequence_with_meta(jd_title)
+    template_id = route_meta.template_id
 
     # 确保返回的模板确实存在，否则用 default
     if template_id in templates:
@@ -1289,7 +1279,7 @@ def _apply_template_gates(
         return "B"
     if will < min_will:
         return "B"
-    if template_id == "senior_product_complex" and min_exp > 0 and exp < min_exp:
+    if min_exp > 0 and exp < min_exp:
         return "B"
 
     return "A"

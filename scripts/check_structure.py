@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
-"""
-TalentFlow 目录结构验证脚本
-
-检查所有必需的文件和目录是否存在
-"""
+"""Validate the huntmind-workbench repository structure."""
 
 import sys
 from pathlib import Path
 
 
-def check_structure():
-    """检查目录结构"""
+def check_structure() -> int:
     project_root = Path(__file__).resolve().parent.parent
 
-    print(f"🔍 检查 TalentFlow 目录结构")
-    print(f"📁 项目根目录: {project_root}\n")
+    print("Checking huntmind-workbench structure")
+    print(f"Project root: {project_root}\n")
 
-    # 必需的目录
     required_dirs = [
         "configs",
         "docs",
@@ -26,10 +20,11 @@ def check_structure():
         "runs",
         "outputs",
         "archive",
-        "skills/talentflow"
+        "skills",
+        "skills/talentflow",
+        "enhancement",
     ]
 
-    # 必需的文件
     required_files = [
         "README.md",
         "requirements.txt",
@@ -51,47 +46,30 @@ def check_structure():
         "pipelines/process_feishu_folder.py",
         "pipelines/process_local_folder.py",
         "archive/feishu_folder_adapter.py",
-        "archive/test_feishu_ingest.py"
+        "archive/test_feishu_ingest.py",
+        "skills/talentflow/SKILL.md",
+        "enhancement/local_provider.py",
     ]
 
-    # 检查目录
-    print("📂 检查目录...")
-    missing_dirs = []
-    for dir_path in required_dirs:
-        full_path = project_root / dir_path
-        if full_path.exists() and full_path.is_dir():
-            print(f"  ✅ {dir_path}")
-        else:
-            print(f"  ❌ {dir_path} (缺失)")
-            missing_dirs.append(dir_path)
+    missing_dirs = [path for path in required_dirs if not (project_root / path).is_dir()]
+    missing_files = [path for path in required_files if not (project_root / path).is_file()]
 
-    # 检查文件
-    print("\n📄 检查文件...")
-    missing_files = []
-    for file_path in required_files:
-        full_path = project_root / file_path
-        if full_path.exists() and full_path.is_file():
-            print(f"  ✅ {file_path}")
-        else:
-            print(f"  ❌ {file_path} (缺失)")
-            missing_files.append(file_path)
-
-    # 总结
-    print("\n" + "="*50)
     if not missing_dirs and not missing_files:
-        print("✅ 目录结构完整！")
+        print("Structure is complete.")
         return 0
-    else:
-        print("❌ 目录结构不完整！")
-        if missing_dirs:
-            print(f"\n缺失的目录 ({len(missing_dirs)}):")
-            for d in missing_dirs:
-                print(f"  - {d}")
-        if missing_files:
-            print(f"\n缺失的文件 ({len(missing_files)}):")
-            for f in missing_files:
-                print(f"  - {f}")
-        return 1
+
+    print("Structure is incomplete.")
+    if missing_dirs:
+        print("\nMissing directories:")
+        for path in missing_dirs:
+            print(f"- {path}")
+
+    if missing_files:
+        print("\nMissing files:")
+        for path in missing_files:
+            print(f"- {path}")
+
+    return 1
 
 
 if __name__ == "__main__":

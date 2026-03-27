@@ -1,0 +1,12 @@
+{"jd_title":"高级产品经理","expected_template":"product_manager","notes":"标准产品岗"}
+{"jd_title":"AI产品经理","expected_template":"product_manager","notes":"AI仍归产品模板"}
+{"jd_title":"Java后端工程师","expected_template":"rd_engineer","notes":"研发模板"}
+{"jd_title":"算法工程师","expected_template":"rd_engineer","notes":"研发模板"}
+{"jd_title":"用户运营经理","expected_template":"ops_manager","notes":"运营模板"}
+{"jd_title":"电商运营负责人","expected_template":"ops_manager","notes":"运营模板"}
+{"jd_title":"销售总监","expected_template":"sales_director","notes":"销售模板"}
+{"jd_title":"品牌市场负责人","expected_template":"sales_director","notes":"市场并入商业模板"}
+{"jd_title":"招聘经理","expected_template":"hr_director","notes":"HR模板"}
+{"jd_title":"HRBP","expected_template":"hr_director","notes":"HR模板"}
+{"jd_title":"财务经理","expected_template":"hr_director","notes":"当前归职能模板"}
+{"jd_title":"法务主管","expected_template":"hr_director","notes":"当前归职能模板"}

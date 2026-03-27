@@ -1,299 +1,64 @@
-# TalentFlow - 招聘 Skill Backend / Pipeline
+# huntmind-workbench
 
-> TalentFlow 是 HuntMind 的招聘 skill backend，不是 AI 员工本体。
+`huntmind-workbench` is the engineering workbench around HuntMind.
 
----
+It is not the HuntMind agent itself. HuntMind remains the decision-making agent with its own soul, identity, memory, and orchestration.
 
-## 先写死的设计公约（后续代码必须遵守）
+## Boundary
 
-### 1. 身份边界
-- **HuntMind 才是 AI 招聘员工本体**
-- **TalentFlow 只是专为 AI 招聘设计的 skill backend / workflow backend**
-- TalentFlow 可以是独立工程，但不能拥有独立 agent 身份
+- `HuntMind`: agent and decision owner
+- `TalentFlow`: one process skill inside this workbench
+- `Paid enhancement layer`: owner of taxonomy, template rules, routing hints, and customer-specific decision boosts
 
-### 2. 职责边界
-#### HuntMind 负责
-- 决策主体身份
-- 模型选择（GLM / Gemini / Claude / OpenAI 等）
-- API 配置与调用
-- memory / context / system prompt
-- 招聘判断
-- 决定什么时候调用招聘 skill
+## Current Shape
 
-#### TalentFlow 负责
-- 简历读取
-- PDF / 文本解析与标准化
-- `batch_input.json` 构建与校验
-- 对 HuntMind 返回结果做结构化后处理
-- 生成 `final_output / quality_meta / final_report / owner_summary / run_meta`
+This repository is `single repo, multi-skill`.
 
-### 3. skill 不能反客为主
-TalentFlow **不负责**：
-- 选择模型
-- 管 API key
-- 管 base_url
-- 决定 prompt
-- 自己变成另一个 bot
+Current modules:
+- `skills/talentflow`: resume ingestion, normalization, batch building, validation, finalization
+- `references/`: decision contracts and output constraints
+- `evals/`: calibration and regression assets
+- `enhancement/`: temporary local stubs for the future paid enhancement layer
 
-TalentFlow 只接收 bot 提供的判断能力或判断结果。
+Planned modules:
+- `skills/search`
 
-### 4. 当前阶段高度收敛
-当前目标不是做通用招聘平台，也不是提前做商业化平台层。
-当前阶段只打透一个窄场景：
+## TalentFlow Skill
 
-**一个 JD + 一批真实简历 + HuntMind 判断 + 稳定结构化输出**
+`TalentFlow` is a workflow skill, not an enhancement service.
 
-### 5. 语言选择原则
-当前 **不因为 skill 化而重写成 JS/TS**。
-现有 Python 代码继续作为 skill backend 保留；
-未来如果 HuntMind runtime 需要 JS/TS，只补薄适配层，不整体重写 TalentFlow。
+It is responsible for:
+- reading resumes from local or temporary folders
+- parsing and normalizing candidate data
+- building `batch_input.json`
+- validating and sanitizing HuntMind outputs
+- generating `final_output.json`, `quality_meta.json`, `final_report.md`, and `owner_summary.md`
 
-### 6. prompt 迁移原则
-`configs/system_prompt.md` 里的有效招聘规则不能直接丢掉。
-后续要把它拆到：
-- `SKILL.md`：路由、阶段流程、关键守门原则
-- `references/*.md`：决策规则、输出 contract、转化话术、写作约束
-- `scripts/*.py`：确定性校验与后处理
+It does not own:
+- company industry classification
+- JD to 5-template routing ownership
+- taxonomy / template / hints authority
+- agent memory or learning logic
+- model ownership
 
-### 7. 模型负责判断，脚本负责守门
-- HuntMind / bot 负责判断
-- TalentFlow / scripts 负责输入准备、结构校验、质量门禁、报告生成
+## Enhancement Layer
 
----
+The future paid enhancement layer is separate from `TalentFlow`.
 
-## 项目定位
+Its job is to provide:
+- better company and JD classification
+- stronger routing and hit accuracy
+- taxonomy and template rule access
+- decision hints and customer-specific boosts
 
-TalentFlow 的职责很简单：
+The local files under `enhancement/` are only temporary stubs for interface shaping. They do not mean those capabilities belong to `TalentFlow`.
 
-1. 读取本地目录 / 外部目录中的简历
-2. 解析 PDF / 文本并标准化候选人信息
-3. 构建并校验 `batch_input`
-4. 将 `batch_input` 交给外部 bot 的 decision handler，或者等待 HuntMind 自己读取并判断
-5. 对 bot 返回结果做结构化后处理并落盘
+## Repository Rename
 
-一句话：
+The local worktree now uses the name `huntmind-workbench`.
 
-**HuntMind 对外，TalentFlow 对内。**
-**HuntMind 是能力体，TalentFlow 是招聘 skill backend。**
-
----
-
-## 当前工作方式
-
-### A. TalentFlow 做准备
-```bash
-python pipelines/process_local_folder.py ./resumes --jd ./jd.json
-```
-
-这一步会完成：
-- 读取简历
-- 解析并标准化
-- 生成 `batch_input.json`
-- 生成 `run_meta.json`
-
-### B. HuntMind 做判断
-HuntMind 读取 `batch_input.json`，完成招聘判断，产出 JSON 结果。
-
-### C. TalentFlow 做后处理
-TalentFlow 使用 `core.runner` 和 `core.final_reporter` 对 HuntMind 的结果做：
-- JSON 结构校验
-- 业务清洗与兜底
-- 质量门禁
-- 报告生成
-
----
-
-## 为什么这样设计
-
-因为用户面对的是：
-- “帮我筛这批简历”
-- “给这批候选人联系优先级”
-- “生成招聘判断报告”
-
-用户不应该面对：
-- 哪个脚本先跑
-- 模型怎么配
-- API key 放哪里
-- prompt 长什么样
-
-这些都应该由 HuntMind 和 skill backend 在内部编排完成。
-
----
-
-## 输出产物
-
-运行目录保留这些产物：
-- `candidates/`
-- `batch_input.json`
-- `run_meta.json`
-- `final_output.json`（在完成判断并回传后生成）
-- `quality_meta.json`（在完成判断并回传后生成）
-- `final_report.md`（在完成判断并回传后生成）
-- `owner_summary.md`（在完成判断并回传后生成）
-
----
-
-## 当前主接口（暂行）
-
-### Python 接口
-```python
-from pipelines.process_local_folder import process_local_folder
-
-result = process_local_folder(
-    folder_path="./resumes",
-    jd_data=jd_data,
-    decision_handler=bot_decide,
-    bot_name="huntmind",
-)
-```
-
-其中 `bot_decide(batch_input) -> str` 由外部 bot 提供。
-返回值必须是 `core.runner` 可消费的 JSON 文本。
-
-### CLI 接口
-```bash
-python pipelines/process_local_folder.py ./resumes --jd ./jd.json
-```
-
-默认只做 skill 准备，不自己调用模型。
-
----
-
-## 下一步代码改造顺序
-
-### Step 1
-先把约定固化到 README（当前已完成）
-
-### Step 2
-新增 `SKILL.md` 骨架，明确：
-- 触发条件
-- 输入形态
-- 阶段流程
-- 失败处理
-- 调用哪些 references / scripts
-
-### Step 3
-把 `configs/system_prompt.md` 拆到：
-- `references/decision-policy.md`
-- `references/output-contract.md`
-- `references/conversion-guidelines.md`
-- `references/writing-style-constraints.md`
-
-### Step 4
-把确定性逻辑沉到脚本：
-- 输入校验
-- 输出校验
-- 质量门禁
-- 报告生成
-
-### Step 5
-继续清理仓库里会误导人为“TalentFlow 自己会调模型”的旧入口和旧残留
-
----
-
-## 结论
-
-TalentFlow 现在的目标不是“变成 AI 招聘员工”。
-它的目标是：
-
-**成为一个干净、可复用、专为招聘场景服务的 skill backend / pipeline。**
-
-而 AI 员工本体，始终应该是 HuntMind。
-
----
-
-## 真实测试标准流程
-
-> 以下是 TalentFlow 的正确使用方式，对应真实的「一个 JD + 一批简历 + HuntMind 判断」闭环。
-
-### 前置准备
-
-1. **准备 JD 文件**（JSON 格式）：
-   ```bash
-   cat > ./jd.json << 'JD'
-   {
-     "title": "品牌战略总监",
-     "department": "战略部",
-     "location": "宁波",
-     "salary": "面议",
-     "requirements": [...],
-     "responsibilities": [...]
-   }
-   JD
-   ```
-
-2. **准备简历目录**（支持 pdf/docx/txt/md）：
-   ```
-   ./resumes/
-   ├── candidate_wang.pdf
-   ├── candidate_li.docx
-   └── candidate_zhang.txt
-   ```
-
-### 标准 Workflow（5步）
+If the GitHub repository is still named `talentflow`, update the remote later with:
 
 ```bash
-# Step A: TalentFlow 读取简历，生成 batch_input.json
-python pipelines/process_local_folder.py ./resumes --jd ./jd.json
-
-# → 产出：runs/run_xxx/batch_input.json
-#         runs/run_xxx/candidates/（标准化后的候选人文件）
-
-# Step B: HuntMind 读取 batch_input.json，自主做招聘判断
-#         HuntMind agent 自主完成判断，将结果写入 runs/run_xxx/huntmind_output.json
-#         TalentFlow 不调用模型，不写这个文件
-
-# Step C: TalentFlow 校验并清洗模型输出
-python scripts/validate_model_output.py \
-    runs/run_xxx/batch_input.json \
-    runs/run_xxx/huntmind_output.json \
-    --write-final-output runs/run_xxx/final_output.json
-
-# 可选：同时产出质量元数据
-python scripts/validate_model_output.py \
-    runs/run_xxx/batch_input.json \
-    runs/run_xxx/huntmind_output.json \
-    --write-final-output runs/run_xxx/final_output.json \
-    --write-quality-meta runs/run_xxx/quality_meta.json
-
-# Step D: TalentFlow 生成最终报告
-python scripts/finalize_report.py runs/run_xxx runs/run_xxx/huntmind_output.json
-
-# → 产出：runs/run_xxx/final_output.json
-#              runs/run_xxx/final_report.md
-#              runs/run_xxx/owner_summary.md
-
-# Step E: 质量门禁检查（只读，不写文件）
-python scripts/quality_gate.py runs/run_xxx/final_output.json
-
-# 退出码 0 = 通过，1 = 未通过（质量分 < 阈值 或 quality_flag = invalid）
-# 默认阈值 70，可通过 --min-score 调整
+git remote set-url origin <new-repo-url>
 ```
-
-### 运行产物
-
-```
-runs/run_xxx/
-├── batch_input.json         # Step A 产出（TalentFlow 写入）
-├── candidates/              # Step A 产出（标准化候选人文件）
-├── huntmind_output.json     # Step B 产出（HuntMind agent 写入）
-├── final_output.json        # Step C 产出（需加 --write-final-output）
-├── final_report.md          # Step D 产出（可读报告）
-├── owner_summary.md         # Step D 产出（Owner 视图）
-├── quality_meta.json        # Step C 可选产出（需加 --write-quality-meta）
-└── run_meta.json            # Step A 产出（运行元数据）
-```
-
-### 常见问题
-
-**Q: Step B 由谁完成？**
-A: HuntMind agent。TalentFlow 负责简历读取和后处理，不调用模型。HuntMind 将结果写入 `huntmind_output.json`。
-
-**Q: 质量门禁不通过（退出码1）怎么办？**
-A: 检查输出的 `quality` 字段，定位具体失败原因。可调整 `--min-score` 阈值，或在 `final_output.json` 中修正数据后重新检查。
-
-**Q: --write-quality-meta 是什么？**
-A: 可选参数。带上时会在指定路径写入 `quality_meta.json`，不带则只输出到 stdout。
-
-**Q: talentflow 支持传入 API key 让它自己调模型吗？**
-A: 不支持。TalentFlow 是 skill backend，不持有模型配置，不调用 LLM。所有模型调用由外部 HuntMind agent 负责。

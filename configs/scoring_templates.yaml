@@ -1,8 +1,80 @@
-version: v5
+version: v6
 default_template: product_manager
+
+routing:
+  direct_terms:
+    product_manager:
+      - product manager
+      - 产品经理
+      - 产品总监
+      - 项目经理
+      - ai产品
+    rd_engineer:
+      - engineer
+      - developer
+      - 研发
+      - 开发
+      - 算法
+      - 测试
+      - 前端
+      - 后端
+    ops_manager:
+      - operations
+      - 运营
+      - 用户运营
+      - 内容运营
+      - 电商运营
+      - 供应链
+    sales_director:
+      - sales
+      - 销售
+      - bd
+      - business development
+      - 渠道
+      - 商务
+      - 品牌
+      - 市场
+    hr_director:
+      - hr
+      - 招聘
+      - 人力
+      - 人力资源
+      - hrbp
+      - 行政
+      - 财务
+      - 法务
+
 templates:
   product_manager:
-    description: 产品经理 | 需求洞察/功能规划/跨部门协调
+    description: Product and product-adjacent decision template
+    routing:
+      strong_signals:
+        - 产品规划
+        - 需求分析
+        - prd
+        - 用户研究
+        - roadmap
+      weak_signals:
+        - 项目交付
+        - 跨部门
+        - 业务分析
+      exclude_signals:
+        - 招聘
+        - 销售
+        - 人力资源
+        - 财务
+        - 法务
+        - 开发工程师
+        - 测试工程师
+    must_focus_signals:
+      - requirement analysis
+      - product planning
+      - prioritization
+      - cross-functional execution
+    risk_signals:
+      - project coordination with weak product ownership
+      - no roadmap or prioritization evidence
+      - only support-facing delivery work
     weights:
       hard_skill_match: 25
       experience_depth: 25
@@ -15,8 +87,38 @@ templates:
       min_hard_skill_for_a: 50
       min_willingness_for_a: 40
       min_experience_for_a: 50
+
   rd_engineer:
-    description: 研发工程师 | 技术实现/架构设计/代码质量
+    description: Engineering decision template
+    routing:
+      strong_signals:
+        - java
+        - python
+        - golang
+        - 前端
+        - 后端
+        - 算法
+        - 架构
+        - 测试
+      weak_signals:
+        - 系统设计
+        - 数据库
+        - 微服务
+      exclude_signals:
+        - 招聘
+        - hrbp
+        - 销售
+        - 商务
+        - 运营专员
+    must_focus_signals:
+      - programming fundamentals
+      - production engineering
+      - system design
+      - technical ownership
+    risk_signals:
+      - no production delivery evidence
+      - only training or demo projects
+      - function mismatch from non-engineering track
     weights:
       hard_skill_match: 30
       experience_depth: 25
@@ -29,8 +131,37 @@ templates:
       min_hard_skill_for_a: 55
       min_willingness_for_a: 40
       min_experience_for_a: 50
+
   ops_manager:
-    description: 运营经理 | 目标达成/数据驱动/用户增长
+    description: Operations decision template
+    routing:
+      strong_signals:
+        - 运营
+        - 用户增长
+        - 留存
+        - 电商运营
+        - 内容运营
+        - 商家运营
+        - 供应链
+      weak_signals:
+        - 数据分析
+        - 转化
+        - 活动运营
+      exclude_signals:
+        - 招聘
+        - 法务
+        - 财务
+        - 销售总监
+        - 开发工程师
+    must_focus_signals:
+      - operational metrics
+      - target execution
+      - process optimization
+      - growth or retention ownership
+    risk_signals:
+      - support-only background
+      - no metrics ownership
+      - weak target delivery evidence
     weights:
       hard_skill_match: 20
       experience_depth: 25
@@ -43,8 +174,37 @@ templates:
       min_hard_skill_for_a: 45
       min_willingness_for_a: 40
       min_experience_for_a: 50
+
   sales_director:
-    description: 销售总监 | 大客户开拓/渠道管理/业绩达成
+    description: Sales and business development decision template
+    routing:
+      strong_signals:
+        - 销售
+        - 渠道
+        - 商务拓展
+        - 大客户
+        - 品牌
+        - 市场
+        - 招商
+      weak_signals:
+        - 商业化
+        - 客户开发
+        - 成交
+      exclude_signals:
+        - 招聘
+        - 行政
+        - 法务
+        - 开发工程师
+        - 产品经理
+    must_focus_signals:
+      - pipeline ownership
+      - customer conversion
+      - quota or target delivery
+      - deal progression
+    risk_signals:
+      - branding-only background
+      - no target ownership
+      - weak conversion evidence
     weights:
       hard_skill_match: 30
       experience_depth: 30
@@ -57,8 +217,39 @@ templates:
       min_hard_skill_for_a: 55
       min_willingness_for_a: 45
       min_experience_for_a: 50
+
   hr_director:
-    description: HR总监 | 组织发展/文化塑造/人才战略
+    description: HR and functional decision template
+    routing:
+      strong_signals:
+        - 招聘
+        - hr
+        - hrbp
+        - 人力资源
+        - 绩效
+        - 行政
+        - 财务
+        - 法务
+      weak_signals:
+        - 组织发展
+        - 薪酬
+        - 员工关系
+      exclude_signals:
+        - 销售
+        - 渠道
+        - 前端
+        - 后端
+        - 算法
+        - 电商运营
+    must_focus_signals:
+      - people process ownership
+      - recruiting or org development
+      - stakeholder alignment
+      - policy or calibration
+    risk_signals:
+      - admin-heavy with no strategic ownership
+      - isolated specialist work only
+      - weak hiring judgement evidence
     weights:
       hard_skill_match: 20
       experience_depth: 30
@@ -71,3 +262,9 @@ templates:
       min_hard_skill_for_a: 45
       min_willingness_for_a: 40
       min_experience_for_a: 55
+
+industry_adjustments:
+  healthcare:
+    add:
+      hard_skill_match: 5
+      experience_depth: 5

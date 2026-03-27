@@ -1,0 +1,52 @@
+version: v1
+templates:
+  product_manager:
+    must_focus_signals:
+      - requirement analysis
+      - product planning
+      - cross-functional delivery
+      - user insight
+    risk_signals:
+      - project-only with no product ownership
+      - pure implementation coordination
+      - no evidence of roadmap or prioritization
+  rd_engineer:
+    must_focus_signals:
+      - programming fundamentals
+      - system design
+      - code ownership
+      - debugging and delivery
+    risk_signals:
+      - only training/demo projects
+      - no production engineering evidence
+      - role mismatch from non-engineering track
+  ops_manager:
+    must_focus_signals:
+      - operational metrics
+      - growth or retention actions
+      - execution rhythm
+      - process optimization
+    risk_signals:
+      - pure support with no operational ownership
+      - weak metric awareness
+      - no evidence of target delivery
+  sales_director:
+    must_focus_signals:
+      - pipeline ownership
+      - deal closing
+      - channel or enterprise development
+      - quota delivery
+    risk_signals:
+      - branding-only background
+      - no sales target ownership
+      - weak customer conversion evidence
+  hr_director:
+    must_focus_signals:
+      - recruiting or org development
+      - people process ownership
+      - stakeholder management
+      - policy or talent calibration
+    risk_signals:
+      - admin-heavy with no strategic HR ownership
+      - isolated specialist background
+      - weak hiring judgement evidence

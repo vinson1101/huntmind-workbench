@@ -1,93 +1,32 @@
-# GitHub 仓库创建记录
+# GitHub Repository Notes
 
-## 📊 仓库信息
+## Intended Repository Name
 
-- **仓库名称**：talentflow
-- **所有者**：vinson1101
-- **仓库地址**：https://github.com/vinson1101/talentflow
-- **创建时间**：2026年3月22日 15:58
-- **可见性**：Public
-- **默认分支**：main
+- repository name: `huntmind-workbench`
+- owner: `vinson1101`
+- local worktree: `D:\code project\huntmind-workbench`
 
-## 🎯 初始提交
+## Current State
 
-**Commit ID**: a3f1d1b
+- the local project name has been changed to `huntmind-workbench`
+- the GitHub repository may still be using the old `talentflow` name
+- update `origin` after the GitHub-side rename is complete
 
-**提交信息**:
-```
-Initial commit: TalentFlow v0.1.0
-
-- 招聘决策流水线系统
-- 分层架构：configs/core/adapters/pipelines
-- 支持飞书、本地文件适配
-- 完整的数据存储、报告生成模块
-```
-
-**文件统计**:
-- 28个文件
-- 3105行代码
-
-## 📁 目录结构
-
-```
-talentflow/
-├── .gitignore
-├── .env.example
-├── README.md
-├── requirements.txt
-├── configs/              # 配置文件
-├── docs/                 # 文档
-├── core/                 # 核心逻辑
-├── adapters/             # 数据源适配器
-├── pipelines/            # 处理流程
-├── runs/                 # 运行记录
-├── outputs/              # 最终输出
-├── archive/              # 归档文件
-└── skills/               # Skill化
-```
-
-## 🔐 认证方式
-
-使用 GitHub Personal Access Token 认证：
+## After GitHub Rename
 
 ```bash
-# Token存储在 .env 文件
-GH_TOKEN=ghp_**************** (已隐藏)
-
-# 认证命令
-echo "$GH_TOKEN" | gh auth login --with-token
+git remote set-url origin <new-repo-url>
+git remote -v
 ```
 
-## 📝 后续维护
+## Positioning
 
-### 提交新代码
-```bash
-cd talentflow
-git add .
-git commit -m "描述信息"
-git push
-```
+This repository is the HuntMind engineering workbench.
 
-### 查看仓库状态
-```bash
-gh repo view
-gh repo view --web
-```
+It is not the HuntMind agent itself, and it is not equal to the `TalentFlow` skill.
 
-### 创建 Release
-```bash
-gh release create v0.1.0 --title "TalentFlow v0.1.0" --notes "初始版本"
-```
+## Internal Boundary
 
-## ⭐ 核心特性
-
-1. **分层架构**：清晰的职责分离
-2. **多源适配**：支持飞书、本地文件
-3. **完整流程**：解析 → 评估 → 存储 → 报告
-4. **可扩展**：预留钉钉、Skill化接口
-
----
-
-**创建者**: HuntMind (AI Agent)
-**所有者**: Vinson Sun (vinson1101)
-**创建日期**: 2026-03-22
+- `HuntMind`: agent and decision owner
+- `TalentFlow`: process skill
+- `Paid enhancement layer`: taxonomy, routing, hints, and decision boosts

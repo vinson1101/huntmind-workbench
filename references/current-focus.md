@@ -1,58 +1,36 @@
-# 当前阶段目标
+# Current Focus
 
-## 状态
-- 主链路已通（batch_input → validate → sanitize → report → quality_gate）
-- 已完成 P4 质量门禁重构
-- 已完成 P5 7维评分体系落地
+## Immediate Goal
 
----
+Enter the pre-production debt-paydown phase.
 
-## 当前阶段：校准阶段
+## P0: Template Balance
 
-**只做三件事：**
+Fix routing imbalance so the 5 fixed templates stay distinct:
 
-1. **修 core_judgement 分数与 total_score 同步**
-   - core_judgement 中的数字必须与最终 total_score 一致，或直接不写具体分数
-   - 禁止出现"综合评分82分"但 total_score=56 的严重脱节
+- `product_manager`
+- `rd_engineer`
+- `ops_manager`
+- `sales_director`
+- `hr_director`
 
-2. **复核模板选择逻辑**
-   - 当前几乎所有候选人都命中 senior_product_complex
-   - 需考虑 candidate_role 对模板选择的影响（如 transition_to_product 的优先级）
-   - 下一步再优化，非当前优先
+What matters now:
+- keep template boundaries explicit
+- avoid product/general swallowing unrelated JDs
+- maintain a manual `JD -> template` calibration set
+- inspect route evidence, not just final template ids
 
-3. **用固定 12 人样本和 HR 判断对齐**
-   - 回归集已沉淀：`evals/golden_set/product_manager_batch_001/`
-   - 包含：jd.json、batch_input.json、huntmind_output.json、final_output.json、12份PDF
-   - 后续所有改动先跑这套黄金集，对照 expected_review.md 验证
+Supporting assets:
+- `evals/template_routing_gold.jsonl`
+- `scripts/template_route_stats.py`
+- `configs/scoring_templates.yaml`
 
----
+## P1: Enhancement-Layer Interface Shaping
 
-## 当前不做
+Do not scatter-read taxonomy, template rules, or decision hints across process code.
 
-- ❌ backfill
-- ❌ 演示/评分算法
-- ❌ 改动前不跑 golden set 验证
-- ❌ 强行推荐（排名必须有，推荐不必须有）
-- ❌ 再改 batch_input / validate / runner 主流程
-- ❌ 临时对话记忆推进，所有结论必须落文件
-- ❌ 为微调视图字段顺序而频繁改动底层写表逻辑
+Current temporary shape:
+- `enhancement/local_provider.py`
 
----
-
-## 回归测试标准
-
-每次改动后，用回归集跑 pipeline，验证：
-
-| 检查项 | 预期 |
-|--------|------|
-| Top3 是否为 邢威峰/李蓓/孙铜 | ✅ |
-| A 档是否包含上述6人 | ✅ |
-| 张金莎/许罗栋/滕锋帅/杨淑婷 是否不在 A | ✅ |
-| dimension_evidence 是否为真实内容 | ✅ |
-| 12人分数是否各不相同 | ✅ |
-| action_timing 是否按 decision 区分 | ✅ |
-| quality_score 是否 ≥ 85 | ✅ |
-
----
-
-*最后更新：2026-03-23*
+This is only a local stub for the future paid enhancement layer.
+It does not make those capabilities part of `TalentFlow`.
