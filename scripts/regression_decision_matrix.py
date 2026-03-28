@@ -99,6 +99,7 @@ def main() -> None:
             "mismatch_type": "hard_mismatch",
             "decision": "no",
             "priority": "N",
+            "willingness": "high",
             "recruitability_breakdown.location_feasibility.level": "low",
         },
     )
@@ -126,7 +127,7 @@ def main() -> None:
         salary_mismatch_input,
         _build_model_output("case_salary", "product_manager", "strong_yes", "A"),
         {
-            "match_fit": "strong",
+            "match_fit": "high",
             "recruitability": "low",
             "recruitability_breakdown.compensation_feasibility.level": "low",
             "decision": "maybe",
@@ -157,10 +158,39 @@ def main() -> None:
         strong_yes_input,
         _build_model_output("case_yes", "product_manager", "yes", "B"),
         {
-            "match_fit": "strong",
+            "match_fit": "high",
             "recruitability": "high",
             "recruitability_breakdown.location_feasibility.level": "high",
             "decision": "strong_yes",
+        },
+    )
+
+    low_fit_high_willingness_input = {
+        "jd": {
+            "title": "销售总监",
+            "must_have": ["大客户销售", "渠道管理"],
+            "nice_to_have": ["汽车行业"],
+            "salary_range": "30-40K",
+            "base_location": "上海",
+            "seniority_level": "senior",
+        },
+        "candidates": [
+            {
+                "candidate_id": "case_will",
+                "raw_resume": "高级产品经理，负责 PRD、需求分析、增长策略，对销售岗位有兴趣",
+                "location": "上海",
+                "expected_salary": "35K",
+            }
+        ],
+    }
+    _run_case(
+        "low_fit_high_willingness_does_not_raise_decision",
+        low_fit_high_willingness_input,
+        _build_model_output("case_will", "sales_director", "yes", "A"),
+        {
+            "match_fit": "low",
+            "willingness": "high",
+            "decision": "no",
         },
     )
 

@@ -13,7 +13,7 @@ LOG_FILE = "feedback_loop.jsonl"
 VALID_DECISIONS = {"strong_yes", "yes", "maybe", "no"}
 VALID_PRIORITIES = {"A", "B", "C", "N"}
 VALID_TIMINGS = {"today", "this_week", "optional"}
-VALID_MATCH_FITS = {"strong", "medium", "weak"}
+VALID_MATCH_FITS = {"high", "medium", "low"}
 VALID_RECRUITABILITIES = {"high", "medium", "low"}
 VALID_MISMATCH_TYPES = {"none", "recoverable", "hard_mismatch"}
 PRIORITY_ORDER = {"A": 0, "B": 1, "C": 2, "N": 3}
@@ -991,22 +991,22 @@ def _derive_decision_from_fit_and_recruit(match_fit: str, recruitability: str) -
     """
     根据 match_fit × recruitability 映射出最终 decision。
     映射规则：
-      strong_yes: match_fit=strong  AND recruitability=high
+      strong_yes: match_fit=high    AND recruitability=high
       yes:        match_fit>=medium AND recruitability>=medium
       maybe:      (match_fit>=medium AND recruitability=low)
-                  OR (match_fit=weak   AND recruitability>=medium)
-      no:         match_fit=weak      AND recruitability=low
+                  OR (match_fit=low    AND recruitability>=medium)
+      no:         match_fit=low       AND recruitability=low
     """
     mf = match_fit if match_fit in VALID_MATCH_FITS else "medium"
     rc = recruitability if recruitability in VALID_RECRUITABILITIES else "medium"
 
-    if mf == "strong" and rc == "high":
+    if mf == "high" and rc == "high":
         return "strong_yes"
-    if mf in ("strong", "medium") and rc in ("high", "medium"):
+    if mf in ("high", "medium") and rc in ("high", "medium"):
         return "yes"
-    if mf in ("strong", "medium") and rc == "low":
+    if mf in ("high", "medium") and rc == "low":
         return "maybe"
-    if mf == "weak" and rc in ("high", "medium"):
+    if mf == "low" and rc in ("high", "medium"):
         return "maybe"
     return "no"
 
@@ -1033,7 +1033,7 @@ def _extract_salary_numbers(text: str) -> List[int]:
     return numbers[:2]
 
 
-def _judge_match_fit(
+def _compute_match_fit(
     candidate: Dict[str, Any],
     source_candidate: Dict[str, Any],
     input_data: Dict[str, Any],
@@ -1048,7 +1048,8 @@ def _judge_match_fit(
     nice_hits = [item for item in nice_to_have if item and item.lower() in text]
 
     template_id = _clean_text(candidate.get("structured_score", {}).get("template_id"))
-    role_alignment = identify_sequence_with_meta(jd["title"]).template_id == template_id if jd["title"] else True
+    route_meta = identify_sequence_with_meta(jd["title"]) if jd["title"] else None
+    role_alignment = route_meta.template_id == template_id if route_meta else True
 
     domain_hits = [tag for tag in jd["domain_tags"] if tag and tag.lower() in text]
     seniority_alignment = True
@@ -1059,40 +1060,59 @@ def _judge_match_fit(
     nice_ratio = len(nice_hits) / len(nice_to_have) if nice_to_have else 0.5
     role_score = 1.0 if role_alignment else 0.0
     domain_score = len(domain_hits) / len(jd["domain_tags"]) if jd["domain_tags"] else 0.5
-    seniority_score = 1.0 if seniority_alignment else 0.3
+    seniority_score = 1.0 if seniority_alignment else 0.35
 
-    weighted = (must_ratio * 0.45) + (nice_ratio * 0.1) + (role_score * 0.25) + (domain_score * 0.1) + (seniority_score * 0.1)
+    must_level = _level_from_score(must_ratio, high_cutoff=0.75, medium_cutoff=0.35)
+    nice_level = _level_from_score(nice_ratio, high_cutoff=0.6, medium_cutoff=0.25)
+    functional_level = "high" if role_alignment else "low"
+    role_direction_level = "high" if role_alignment else ("medium" if route_meta and route_meta.confidence < 0.75 else "low")
+    industry_level = _level_from_score(domain_score, high_cutoff=0.6, medium_cutoff=0.25)
+    seniority_level = "high" if seniority_alignment else "medium"
+
     mismatch_type = _clean_text(candidate.get("mismatch_type"))
-    if mismatch_type == "hard_mismatch":
-        weighted = min(weighted, 0.1)
-    elif mismatch_type == "recoverable":
-        weighted = min(weighted, 0.55)
+    missing_core_must_have = bool(must_have) and must_level == "low"
 
-    level = _level_from_score(weighted, high_cutoff=0.72, medium_cutoff=0.38)
-    match_fit = {"high": "strong", "medium": "medium", "low": "weak"}[level]
+    if mismatch_type == "hard_mismatch" or missing_core_must_have or functional_level == "low":
+        overall = "low"
+    elif must_level != "low" and functional_level == "high" and role_direction_level in {"high", "medium"} and mismatch_type != "recoverable":
+        overall = "high"
+    else:
+        overall = "medium"
 
-    evidence: List[str] = []
-    if must_hits:
-        evidence.append(f"must_have命中{len(must_hits)}/{len(must_have) or 1}")
-    if nice_hits:
-        evidence.append(f"nice_to_have命中{len(nice_hits)}/{len(nice_to_have) or 1}")
-    if role_alignment:
-        evidence.append("岗位方向基本一致")
-    if domain_hits:
-        evidence.append(f"领域标签命中：{'/'.join(domain_hits[:3])}")
-    if not evidence:
-        evidence.append("缺少足够的结构化匹配证据")
+    must_reason = f"must_have 命中 {len(must_hits)}/{len(must_have) or 1}" if must_have else "JD 未给出明确 must_have"
+    nice_reason = f"nice_to_have 命中 {len(nice_hits)}/{len(nice_to_have) or 1}" if nice_to_have else "JD 未给出明确 nice_to_have"
+    functional_reason = "核心职能与岗位模板一致" if role_alignment else "核心职能与岗位模板不一致"
+    role_direction_reason = (
+        f"岗位方向与模板路由一致: {template_id or 'unknown'}"
+        if role_alignment
+        else f"岗位方向存在偏差，JD 更接近 {route_meta.template_id if route_meta else 'unknown'}"
+    )
+    industry_reason = (
+        f"行业/赛道标签命中 {'/'.join(domain_hits[:3])}" if domain_hits else "缺少明确行业/赛道命中证据"
+    )
+    seniority_reason = (
+        f"层级信号与 JD 对齐: {jd['seniority_level']}" if jd["seniority_level"] and seniority_alignment else "层级承接度证据一般"
+    )
+
+    if overall == "high":
+        summary_reason = "核心职能、岗位方向和 must_have 大体匹配，关键证据较完整。"
+    elif overall == "low":
+        summary_reason = "核心职能或关键 must_have 存在明显缺口，当前属于低匹配。"
+    else:
+        summary_reason = "核心职能与岗位方向基本相关，但关键要求仍有缺口，需进一步核验。"
+    if mismatch_type == "recoverable":
+        summary_reason += " 当前更接近 recoverable mismatch。"
 
     return {
-        "match_fit": match_fit,
-        "match_fit_reason": "；".join(evidence),
+        "match_fit": overall,
+        "match_fit_reason": summary_reason,
         "match_fit_breakdown": {
-            "must_have_alignment": _level_from_score(must_ratio),
-            "nice_to_have_alignment": _level_from_score(nice_ratio),
-            "functional_alignment": "high" if role_alignment else "low",
-            "domain_alignment": _level_from_score(domain_score),
-            "seniority_alignment": "high" if seniority_alignment else "medium",
-            "evidence": evidence,
+            "must_have_match": {"level": must_level, "reason": must_reason},
+            "nice_to_have_match": {"level": nice_level, "reason": nice_reason},
+            "functional_fit": {"level": functional_level, "reason": functional_reason},
+            "role_direction_fit": {"level": role_direction_level, "reason": role_direction_reason},
+            "industry_relevance": {"level": industry_level, "reason": industry_reason},
+            "seniority_relevance": {"level": seniority_level, "reason": seniority_reason},
         },
     }
 
@@ -1128,7 +1148,7 @@ def _judge_mismatch_type(
     return "none"
 
 
-def _judge_recruitability(
+def _compute_recruitability(
     candidate: Dict[str, Any],
     source_candidate: Dict[str, Any],
     input_data: Dict[str, Any],
@@ -1140,8 +1160,15 @@ def _judge_recruitability(
     jd_salary = _extract_salary_numbers(jd["salary_range"])
     candidate_salary = _extract_salary_numbers(context["expected_salary"] or context["current_salary"])
     if jd_salary and candidate_salary:
-        comp_level = "high" if candidate_salary[0] <= max(jd_salary) else "low"
-        comp_reason = f"候选人期望薪资 {candidate_salary[0]} 与 JD 薪资范围 {jd['salary_range']} 对比"
+        candidate_floor = candidate_salary[0]
+        jd_ceiling = max(jd_salary)
+        if candidate_floor <= jd_ceiling:
+            comp_level = "high"
+        elif candidate_floor <= jd_ceiling * 1.2:
+            comp_level = "medium"
+        else:
+            comp_level = "low"
+        comp_reason = f"候选人薪资预期 {candidate_floor} 对比 JD 范围 {jd['salary_range']}"
     elif jd["salary_range"]:
         comp_level = "medium"
         comp_reason = "JD 有薪资范围，但候选人薪资信息不足"
@@ -1171,9 +1198,12 @@ def _judge_recruitability(
     elif seniority_level in text:
         seniority_fit = "high"
         seniority_reason = f"候选人经历中出现与 JD 一致的层级信号：{seniority_level}"
+    elif seniority_level == "senior" and any(token in text for token in ("junior", "assistant", "intern")):
+        seniority_fit = "low"
+        seniority_reason = f"候选人当前层级明显低于 JD 需要的 {seniority_level}"
     else:
         seniority_fit = "medium"
-        seniority_reason = f"候选人经历中缺少明确的 {seniority_level} 层级信号"
+        seniority_reason = f"候选人层级承接度需要进一步核验：{seniority_level}"
 
     eligibility_items = jd["eligibility_constraints"] + jd["language_requirements"]
     if not eligibility_items:
@@ -1199,8 +1229,16 @@ def _judge_recruitability(
     else:
         overall = "medium"
 
+    if overall == "high":
+        summary_reason = "薪资、地点、层级和资格约束整体可承接，现实推进阻力较小。"
+    elif overall == "low":
+        summary_reason = "至少存在一项现实约束明显受阻，招聘可达性偏低。"
+    else:
+        summary_reason = "存在一定现实阻力或关键信息不足，需沟通进一步确认。"
+
     return {
         "recruitability": overall,
+        "recruitability_reason": summary_reason,
         "recruitability_breakdown": {
             "compensation_feasibility": {"level": comp_level, "reason": comp_reason},
             "location_feasibility": {"level": location_level, "reason": location_reason},
@@ -1231,6 +1269,19 @@ def _apply_hard_constraints(candidate: Dict[str, Any], input_data: Dict[str, Any
         "hard_issues": hard_issues,
     }
     return candidate
+
+
+def _derive_willingness(candidate: Dict[str, Any]) -> str:
+    structured = candidate.get("structured_score", {})
+    dimension_scores = structured.get("dimension_scores", {}) if isinstance(structured, dict) else {}
+    willingness_score = _clamp_score(dimension_scores.get("willingness"), default=0)
+    if willingness_score >= 75:
+        return "high"
+    if willingness_score >= 40:
+        return "medium"
+    if willingness_score > 0:
+        return "low"
+    return "unknown"
 
 
 def _apply_decision_matrix(candidate: Dict[str, Any]) -> Dict[str, Any]:
@@ -1275,6 +1326,14 @@ def _maybe_override_final_decision(candidate: Dict[str, Any], model_candidate: D
             trace.append(f"{field}:{model_value}->{final_value}")
     candidate["override_trace"] = trace
     candidate["model_decision"] = model_decision
+    candidate["decision_trace"] = {
+        "model_raw_decision": model_decision or _clean_text(candidate.get("decision")),
+        "computed_match_fit": _clean_text(candidate.get("match_fit")),
+        "computed_recruitability": _clean_text(candidate.get("recruitability")),
+        "mismatch_type": _clean_text(candidate.get("mismatch_type")),
+        "final_decision": _clean_text(candidate.get("decision")),
+        "override_reason": trace[-1] if trace else "",
+    }
     return candidate
 
 
@@ -1808,16 +1867,20 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
             "match_fit": str(candidate.get("match_fit") or "").strip().lower(),
             "recruitability": str(candidate.get("recruitability") or "").strip().lower(),
             "mismatch_type": str(candidate.get("mismatch_type") or "").strip().lower(),
+            "willingness": str(candidate.get("willingness") or "").strip().lower(),
             "match_fit_reason": _clean_text(candidate.get("match_fit_reason")),
             "match_fit_breakdown": candidate.get("match_fit_breakdown", {}),
+            "recruitability_reason": _clean_text(candidate.get("recruitability_reason")),
             "recruitability_breakdown": candidate.get("recruitability_breakdown", {}),
             "hard_constraints": candidate.get("hard_constraints", {}),
+            "decision_trace": candidate.get("decision_trace", {}),
             "override_trace": list(candidate.get("override_trace") or []),
         }
 
         normalized_candidate["mismatch_type"] = _judge_mismatch_type(normalized_candidate, source_candidate or {}, input_data or {})
-        normalized_candidate.update(_judge_match_fit(normalized_candidate, source_candidate or {}, input_data or {}))
-        normalized_candidate.update(_judge_recruitability(normalized_candidate, source_candidate or {}, input_data or {}))
+        normalized_candidate.update(_compute_match_fit(normalized_candidate, source_candidate or {}, input_data or {}))
+        normalized_candidate.update(_compute_recruitability(normalized_candidate, source_candidate or {}, input_data or {}))
+        normalized_candidate["willingness"] = _derive_willingness(normalized_candidate)
         normalized_candidate = _sanitize_match_fit_recruitability(normalized_candidate)
         normalized_candidate = _apply_hard_constraints(normalized_candidate, input_data or {})
         normalized_candidate = _apply_decision_matrix(normalized_candidate)

@@ -205,15 +205,20 @@ class FinalReporter:
         match_fit = _clean_text(candidate.get("match_fit"))
         recruitability = _clean_text(candidate.get("recruitability"))
         mismatch_type = _clean_text(candidate.get("mismatch_type"))
+        willingness = _clean_text(candidate.get("willingness"))
         if match_fit:
             lines.append(f"- **Match Fit**: {match_fit}")
         if recruitability:
             lines.append(f"- **Recruitability**: {recruitability}")
+        if willingness:
+            lines.append(f"- **Willingness**: {willingness}")
         if mismatch_type:
             lines.append(f"- **Mismatch Type**: {mismatch_type}")
 
         if _clean_text(candidate.get("match_fit_reason")):
             lines.append(f"- **Match Reason**: {_clean_text(candidate.get('match_fit_reason'))}")
+        if _clean_text(candidate.get("recruitability_reason")):
+            lines.append(f"- **Recruitability Reason**: {_clean_text(candidate.get('recruitability_reason'))}")
 
         recruitability_breakdown = candidate.get("recruitability_breakdown", {})
         if isinstance(recruitability_breakdown, dict) and recruitability_breakdown:
@@ -242,6 +247,21 @@ class FinalReporter:
                 text = _clean_text(trace)
                 if text:
                     lines.append(f"- {text}")
+
+        decision_trace = candidate.get("decision_trace", {})
+        if isinstance(decision_trace, dict) and decision_trace:
+            lines.extend(["", "**Decision Trace**:"])
+            for key in (
+                "model_raw_decision",
+                "computed_match_fit",
+                "computed_recruitability",
+                "mismatch_type",
+                "final_decision",
+                "override_reason",
+            ):
+                value = _clean_text(decision_trace.get(key))
+                if value:
+                    lines.append(f"- {key}: {value}")
 
         lines.extend(["", "**核心判断**:", f"- {self._summary_judgement(candidate)}"])
 

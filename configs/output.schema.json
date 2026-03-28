@@ -54,20 +54,59 @@
           },
           "match_fit": {
             "type": "string",
-            "enum": ["strong", "medium", "weak"]
+            "enum": ["high", "medium", "low"]
           },
           "match_fit_reason": { "type": "string" },
           "match_fit_breakdown": {
             "type": "object",
             "properties": {
-              "must_have_alignment": { "type": "string" },
-              "nice_to_have_alignment": { "type": "string" },
-              "functional_alignment": { "type": "string" },
-              "domain_alignment": { "type": "string" },
-              "seniority_alignment": { "type": "string" },
-              "evidence": {
-                "type": "array",
-                "items": { "type": "string" }
+              "must_have_match": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "nice_to_have_match": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "functional_fit": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "role_direction_fit": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "industry_relevance": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "seniority_relevance": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
               }
             },
             "additionalProperties": true
@@ -76,6 +115,7 @@
             "type": "string",
             "enum": ["high", "medium", "low"]
           },
+          "recruitability_reason": { "type": "string" },
           "recruitability_breakdown": {
             "type": "object",
             "properties": {
@@ -118,7 +158,15 @@
             "type": "string",
             "enum": ["none", "recoverable", "hard_mismatch"]
           },
+          "willingness": {
+            "type": "string",
+            "enum": ["high", "medium", "low", "unknown"]
+          },
           "hard_constraints": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "decision_trace": {
             "type": "object",
             "additionalProperties": true
           },
