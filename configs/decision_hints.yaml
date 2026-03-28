@@ -36,10 +36,17 @@ templates:
       - deal closing
       - channel or enterprise development
       - quota delivery
+      - channel partnerships
+      - strategic cooperation negotiation
+      - market-entry resources
+      - compliance-sensitive business collaboration
     risk_signals:
       - branding-only background
       - no sales target ownership
       - weak customer conversion evidence
+      - weak channel resource evidence
+      - no strategic partnership negotiation history
+      - no compliance collaboration experience
   hr_director:
     must_focus_signals:
       - recruiting or org development

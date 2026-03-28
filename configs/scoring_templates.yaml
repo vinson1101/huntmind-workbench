@@ -66,6 +66,14 @@ templates:
         - 法务
         - 开发工程师
         - 测试工程师
+        - 渠道合作
+        - 渠道伙伴
+        - 战略合作
+        - 交易所
+        - 钱包
+        - KOL
+        - 渠道资源
+        - 市场拓展
     must_focus_signals:
       - requirement analysis
       - product planning
@@ -186,10 +194,25 @@ templates:
         - 品牌
         - 市场
         - 招商
+        - 业务负责人
+        - 战略合作
+        - 渠道合作
+        - 渠道伙伴
+        - 交易所
+        - 钱包
+        - 机构合作
+        - KOL
+        - 香港市场
+        - 渠道资源
+        - 合作协议
       weak_signals:
         - 商业化
         - 客户开发
         - 成交
+        - 市场拓展
+        - 生态合作
+        - partner
+        - partnership
       exclude_signals:
         - 招聘
         - 行政
@@ -201,10 +224,17 @@ templates:
       - customer conversion
       - quota or target delivery
       - deal progression
+      - channel partnerships
+      - strategic deal negotiation
+      - market-entry resources
+      - compliance-sensitive business collaboration
     risk_signals:
       - branding-only background
       - no target ownership
       - weak conversion evidence
+      - weak channel resource evidence
+      - no partnership negotiation history
+      - no regulatory or compliance collaboration experience
     weights:
       hard_skill_match: 30
       experience_depth: 30
