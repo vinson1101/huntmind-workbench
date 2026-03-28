@@ -13,6 +13,8 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime
 import json
 
+from .jd_parser import normalize_jd_data
+
 
 class BatchBuilder:
     """批量输入构建器"""
@@ -25,7 +27,7 @@ class BatchBuilder:
         """
         if not isinstance(jd, dict):
             raise TypeError("jd must be an object matching configs/input.schema.json")
-        self.jd = jd
+        self.jd = normalize_jd_data(jd)
         self.schema_path = schema_path or Path(__file__).resolve().parent.parent / "configs" / "input.schema.json"
 
     def build_batch_input(

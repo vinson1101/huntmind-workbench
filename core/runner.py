@@ -11,13 +11,14 @@ from .sequence_identifier import identify_sequence_with_meta
 LOG_FILE = "feedback_loop.jsonl"
 
 VALID_DECISIONS = {"strong_yes", "yes", "maybe", "no"}
-VALID_PRIORITIES = {"A", "B", "C"}
+VALID_PRIORITIES = {"A", "B", "C", "N"}
 VALID_TIMINGS = {"today", "this_week", "optional"}
 VALID_MATCH_FITS = {"strong", "medium", "weak"}
 VALID_RECRUITABILITIES = {"high", "medium", "low"}
 VALID_MISMATCH_TYPES = {"none", "recoverable", "hard_mismatch"}
-PRIORITY_ORDER = {"A": 0, "B": 1, "C": 2}
+PRIORITY_ORDER = {"A": 0, "B": 1, "C": 2, "N": 3}
 TIMING_ORDER = {"today": 0, "this_week": 1, "optional": 2}
+LEVEL_ORDER = {"low": 0, "medium": 1, "high": 2}
 
 ROLE_KEYWORDS = (
     "高级产品经理",
@@ -71,6 +72,55 @@ def _clean_str_list(values: Any) -> List[str]:
         if text:
             cleaned.append(text)
     return cleaned
+
+
+def _level_from_score(score: float, high_cutoff: float = 0.7, medium_cutoff: float = 0.35) -> str:
+    if score >= high_cutoff:
+        return "high"
+    if score >= medium_cutoff:
+        return "medium"
+    return "low"
+
+
+def _extract_jd_constraints(input_data: Dict[str, Any]) -> Dict[str, Any]:
+    jd = input_data.get("jd", {}) if isinstance(input_data, dict) else {}
+    if not isinstance(jd, dict):
+        jd = {}
+    return {
+        "title": _clean_text(jd.get("title")),
+        "must_have": _clean_str_list(jd.get("must_have")),
+        "nice_to_have": _clean_str_list(jd.get("nice_to_have")),
+        "salary_range": _clean_text(jd.get("salary_range")),
+        "base_location": _clean_text(jd.get("base_location") or jd.get("location")),
+        "seniority_level": _clean_text(jd.get("seniority_level")),
+        "language_requirements": _clean_str_list(jd.get("language_requirements")),
+        "eligibility_constraints": _clean_str_list(jd.get("eligibility_constraints")),
+        "travel_or_relocation": _clean_text(jd.get("travel_or_relocation")),
+        "industry_context": _clean_text(jd.get("industry_context")),
+        "domain_tags": _clean_str_list(jd.get("domain_tags")),
+    }
+
+
+def _extract_candidate_context(candidate: Dict[str, Any], source_candidate: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    source_candidate = source_candidate or {}
+    raw_resume = _clean_text(source_candidate.get("raw_resume") or candidate.get("raw_resume"))
+    combined_text = " ".join(
+        part for part in [
+            raw_resume,
+            _clean_text(candidate.get("core_judgement")),
+            " ".join(_clean_str_list(candidate.get("reasons"))),
+            " ".join(_clean_str_list(candidate.get("risks"))),
+            _clean_text(candidate.get("role_label")),
+            _clean_text(source_candidate.get("location") or candidate.get("location")),
+        ] if part
+    )
+    return {
+        "text": combined_text,
+        "resume": raw_resume,
+        "location": _clean_text(source_candidate.get("location") or candidate.get("location")),
+        "expected_salary": _clean_text(source_candidate.get("expected_salary") or candidate.get("expected_salary")),
+        "current_salary": _clean_text(source_candidate.get("current_salary") or candidate.get("current_salary")),
+    }
 
 
 def _try_parse_dict_like(value: Any) -> Optional[Dict[str, Any]]:
@@ -778,16 +828,13 @@ def validate_output(output_text: str) -> Dict[str, Any]:
             "priority",
             "action_timing",
             "core_judgement",
-            "match_fit",
-            "recruitability",
-            "mismatch_type",
         ]
         for field in required_fields:
             if field not in candidate:
                 raise ValueError(f"❌ recommendation[{index}] missing {field}")
 
         # mismatch_type 枚举校验
-        if candidate.get("mismatch_type") not in VALID_MISMATCH_TYPES:
+        if candidate.get("mismatch_type") is not None and candidate.get("mismatch_type") not in VALID_MISMATCH_TYPES:
             raise ValueError(
                 f"❌ recommendation[{index}].mismatch_type must be one of {VALID_MISMATCH_TYPES}, "
                 f"got: {candidate.get('mismatch_type')}"
@@ -979,22 +1026,265 @@ def _sanitize_match_fit_recruitability(candidate: Dict[str, Any]) -> Dict[str, A
     return candidate
 
 
+def _extract_salary_numbers(text: str) -> List[int]:
+    if not text:
+        return []
+    numbers = [int(value) for value in re.findall(r"(\d{1,3})\s*[kK万wW]?", text)]
+    return numbers[:2]
+
+
+def _judge_match_fit(
+    candidate: Dict[str, Any],
+    source_candidate: Dict[str, Any],
+    input_data: Dict[str, Any],
+) -> Dict[str, Any]:
+    jd = _extract_jd_constraints(input_data)
+    context = _extract_candidate_context(candidate, source_candidate)
+    text = context["text"].lower()
+
+    must_have = jd["must_have"]
+    nice_to_have = jd["nice_to_have"]
+    must_hits = [item for item in must_have if item and item.lower() in text]
+    nice_hits = [item for item in nice_to_have if item and item.lower() in text]
+
+    template_id = _clean_text(candidate.get("structured_score", {}).get("template_id"))
+    role_alignment = identify_sequence_with_meta(jd["title"]).template_id == template_id if jd["title"] else True
+
+    domain_hits = [tag for tag in jd["domain_tags"] if tag and tag.lower() in text]
+    seniority_alignment = True
+    if jd["seniority_level"]:
+        seniority_alignment = jd["seniority_level"] in text
+
+    must_ratio = len(must_hits) / len(must_have) if must_have else 0.5
+    nice_ratio = len(nice_hits) / len(nice_to_have) if nice_to_have else 0.5
+    role_score = 1.0 if role_alignment else 0.0
+    domain_score = len(domain_hits) / len(jd["domain_tags"]) if jd["domain_tags"] else 0.5
+    seniority_score = 1.0 if seniority_alignment else 0.3
+
+    weighted = (must_ratio * 0.45) + (nice_ratio * 0.1) + (role_score * 0.25) + (domain_score * 0.1) + (seniority_score * 0.1)
+    mismatch_type = _clean_text(candidate.get("mismatch_type"))
+    if mismatch_type == "hard_mismatch":
+        weighted = min(weighted, 0.1)
+    elif mismatch_type == "recoverable":
+        weighted = min(weighted, 0.55)
+
+    level = _level_from_score(weighted, high_cutoff=0.72, medium_cutoff=0.38)
+    match_fit = {"high": "strong", "medium": "medium", "low": "weak"}[level]
+
+    evidence: List[str] = []
+    if must_hits:
+        evidence.append(f"must_have命中{len(must_hits)}/{len(must_have) or 1}")
+    if nice_hits:
+        evidence.append(f"nice_to_have命中{len(nice_hits)}/{len(nice_to_have) or 1}")
+    if role_alignment:
+        evidence.append("岗位方向基本一致")
+    if domain_hits:
+        evidence.append(f"领域标签命中：{'/'.join(domain_hits[:3])}")
+    if not evidence:
+        evidence.append("缺少足够的结构化匹配证据")
+
+    return {
+        "match_fit": match_fit,
+        "match_fit_reason": "；".join(evidence),
+        "match_fit_breakdown": {
+            "must_have_alignment": _level_from_score(must_ratio),
+            "nice_to_have_alignment": _level_from_score(nice_ratio),
+            "functional_alignment": "high" if role_alignment else "low",
+            "domain_alignment": _level_from_score(domain_score),
+            "seniority_alignment": "high" if seniority_alignment else "medium",
+            "evidence": evidence,
+        },
+    }
+
+
+def _judge_mismatch_type(
+    candidate: Dict[str, Any],
+    source_candidate: Dict[str, Any],
+    input_data: Dict[str, Any],
+) -> str:
+    raw_value = _clean_text(candidate.get("mismatch_type")).lower()
+    if raw_value in VALID_MISMATCH_TYPES:
+        return raw_value
+
+    jd = _extract_jd_constraints(input_data)
+    route_template = identify_sequence_with_meta(jd["title"]).template_id if jd["title"] else ""
+    current_template = _clean_text(candidate.get("structured_score", {}).get("template_id"))
+    text = _extract_candidate_context(candidate, source_candidate)["text"]
+    negative_signals = ["不匹配", "角色错位", "转岗", "缺乏", "不足", "非目标岗位"]
+
+    if route_template and current_template and route_template != current_template:
+        return "hard_mismatch"
+    if any(signal in text for signal in negative_signals):
+        return "hard_mismatch"
+
+    must_have = jd["must_have"]
+    if must_have:
+        hits = sum(1 for item in must_have if item.lower() in text.lower())
+        if hits == 0:
+            return "hard_mismatch"
+        if hits < len(must_have):
+            return "recoverable"
+
+    return "none"
+
+
+def _judge_recruitability(
+    candidate: Dict[str, Any],
+    source_candidate: Dict[str, Any],
+    input_data: Dict[str, Any],
+) -> Dict[str, Any]:
+    jd = _extract_jd_constraints(input_data)
+    context = _extract_candidate_context(candidate, source_candidate)
+    text = context["text"].lower()
+
+    jd_salary = _extract_salary_numbers(jd["salary_range"])
+    candidate_salary = _extract_salary_numbers(context["expected_salary"] or context["current_salary"])
+    if jd_salary and candidate_salary:
+        comp_level = "high" if candidate_salary[0] <= max(jd_salary) else "low"
+        comp_reason = f"候选人期望薪资 {candidate_salary[0]} 与 JD 薪资范围 {jd['salary_range']} 对比"
+    elif jd["salary_range"]:
+        comp_level = "medium"
+        comp_reason = "JD 有薪资范围，但候选人薪资信息不足"
+    else:
+        comp_level = "medium"
+        comp_reason = "JD 未提供明确薪资约束"
+
+    jd_location = jd["base_location"]
+    candidate_location = context["location"]
+    if jd_location and candidate_location:
+        location_level = "high" if jd_location in candidate_location or candidate_location in jd_location else "low"
+        location_reason = f"JD 地点 {jd_location} 与候选人地点 {candidate_location}"
+    elif jd_location and jd["travel_or_relocation"]:
+        location_level = "medium"
+        location_reason = f"JD 地点 {jd_location}，但允许 {jd['travel_or_relocation']}"
+    elif jd_location:
+        location_level = "medium"
+        location_reason = "JD 有地点约束，但候选人地点信息不足"
+    else:
+        location_level = "medium"
+        location_reason = "JD 未提供明确地点约束"
+
+    seniority_level = jd["seniority_level"]
+    if not seniority_level:
+        seniority_fit = "medium"
+        seniority_reason = "JD 未提供明确层级约束"
+    elif seniority_level in text:
+        seniority_fit = "high"
+        seniority_reason = f"候选人经历中出现与 JD 一致的层级信号：{seniority_level}"
+    else:
+        seniority_fit = "medium"
+        seniority_reason = f"候选人经历中缺少明确的 {seniority_level} 层级信号"
+
+    eligibility_items = jd["eligibility_constraints"] + jd["language_requirements"]
+    if not eligibility_items:
+        eligibility_level = "medium"
+        eligibility_reason = "JD 未提供明确资格约束"
+    else:
+        hits = [item for item in eligibility_items if item.lower() in text]
+        if len(hits) == len(eligibility_items):
+            eligibility_level = "high"
+            eligibility_reason = f"资格/语言约束均有证据：{'/'.join(hits[:3])}"
+        elif hits:
+            eligibility_level = "medium"
+            eligibility_reason = f"部分资格/语言约束有证据：{'/'.join(hits[:3])}"
+        else:
+            eligibility_level = "low"
+            eligibility_reason = "资格/语言约束缺少明确证据"
+
+    levels = [comp_level, location_level, seniority_fit, eligibility_level]
+    if "low" in levels:
+        overall = "low"
+    elif levels.count("high") >= 3:
+        overall = "high"
+    else:
+        overall = "medium"
+
+    return {
+        "recruitability": overall,
+        "recruitability_breakdown": {
+            "compensation_feasibility": {"level": comp_level, "reason": comp_reason},
+            "location_feasibility": {"level": location_level, "reason": location_reason},
+            "seniority_fit": {"level": seniority_fit, "reason": seniority_reason},
+            "eligibility_constraint": {"level": eligibility_level, "reason": eligibility_reason},
+        },
+    }
+
+
+def _apply_hard_constraints(candidate: Dict[str, Any], input_data: Dict[str, Any]) -> Dict[str, Any]:
+    jd = _extract_jd_constraints(input_data)
+    breakdown = candidate.get("recruitability_breakdown", {})
+    issues: List[str] = []
+    hard_issues: List[str] = []
+
+    if breakdown.get("compensation_feasibility", {}).get("level") == "low":
+        issues.append("compensation_mismatch")
+    if breakdown.get("location_feasibility", {}).get("level") == "low" and not jd.get("travel_or_relocation"):
+        issues.append("location_mismatch")
+        hard_issues.append("location_mismatch")
+    if breakdown.get("eligibility_constraint", {}).get("level") == "low":
+        issues.append("eligibility_constraint")
+        hard_issues.append("eligibility_constraint")
+
+    candidate["hard_constraints"] = {
+        "triggered": bool(hard_issues),
+        "issues": issues,
+        "hard_issues": hard_issues,
+    }
+    return candidate
+
+
+def _apply_decision_matrix(candidate: Dict[str, Any]) -> Dict[str, Any]:
+    match_fit = candidate.get("match_fit", "medium")
+    recruitability = candidate.get("recruitability", "medium")
+    mismatch_type = candidate.get("mismatch_type", "none")
+    hard_constraints = candidate.get("hard_constraints", {})
+
+    if mismatch_type == "hard_mismatch" or hard_constraints.get("triggered"):
+        decision = "no"
+    else:
+        decision = _derive_decision_from_fit_and_recruit(match_fit, recruitability)
+
+    if decision == "strong_yes":
+        priority = "A"
+        timing = "today"
+    elif decision == "yes":
+        priority = "B"
+        timing = "this_week"
+    elif decision == "maybe":
+        priority = "C"
+        timing = "optional"
+    else:
+        priority = "N"
+        timing = "optional"
+
+    candidate["decision"] = decision
+    candidate["priority"] = priority
+    candidate["action_timing"] = timing
+    return candidate
+
+
+def _maybe_override_final_decision(candidate: Dict[str, Any], model_candidate: Dict[str, Any]) -> Dict[str, Any]:
+    trace = list(candidate.get("override_trace") or [])
+    model_decision = _clean_text(model_candidate.get("decision"))
+    if model_decision and model_decision != candidate.get("decision"):
+        trace.append(f"decision:{model_decision}->{candidate.get('decision')}")
+    for field in ("priority", "action_timing"):
+        model_value = _clean_text(model_candidate.get(field))
+        final_value = _clean_text(candidate.get(field))
+        if model_value and model_value != final_value:
+            trace.append(f"{field}:{model_value}->{final_value}")
+    candidate["override_trace"] = trace
+    candidate["model_decision"] = model_decision
+    return candidate
+
+
 def _apply_hard_mismatch_guard(candidate: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    硬规则守门：mismatch_type == hard_mismatch 时，强制压 decision=no。
-    同时收敛：
-    - priority = N
-    - action_timing = optional
-    - should_contact = false
-    - 清空所有外联文案
-    """
-    if candidate.get("mismatch_type") != "hard_mismatch":
+    if candidate.get("mismatch_type") != "hard_mismatch" and not candidate.get("hard_constraints", {}).get("triggered"):
         return candidate
 
     candidate["decision"] = "no"
     candidate["priority"] = "N"
     candidate["action_timing"] = "optional"
-
     action = candidate.get("action") or {}
     action["should_contact"] = False
     action["hook_message"] = ""
@@ -1002,7 +1292,6 @@ def _apply_hard_mismatch_guard(candidate: Dict[str, Any]) -> Dict[str, Any]:
     action["message_template"] = ""
     action["deep_questions"] = []
     candidate["action"] = action
-
     return candidate
 
 
@@ -1516,32 +1805,23 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
             "reasons": reasons,
             "risks": risks,
             "score_breakdown": score_breakdown,
-            # match_fit / recruitability / mismatch_type 由后续逻辑规范化后填入
             "match_fit": str(candidate.get("match_fit") or "").strip().lower(),
             "recruitability": str(candidate.get("recruitability") or "").strip().lower(),
             "mismatch_type": str(candidate.get("mismatch_type") or "").strip().lower(),
+            "match_fit_reason": _clean_text(candidate.get("match_fit_reason")),
+            "match_fit_breakdown": candidate.get("match_fit_breakdown", {}),
+            "recruitability_breakdown": candidate.get("recruitability_breakdown", {}),
+            "hard_constraints": candidate.get("hard_constraints", {}),
+            "override_trace": list(candidate.get("override_trace") or []),
         }
 
-        # --- decision mapping: match_fit × recruitability → final decision ---
+        normalized_candidate["mismatch_type"] = _judge_mismatch_type(normalized_candidate, source_candidate or {}, input_data or {})
+        normalized_candidate.update(_judge_match_fit(normalized_candidate, source_candidate or {}, input_data or {}))
+        normalized_candidate.update(_judge_recruitability(normalized_candidate, source_candidate or {}, input_data or {}))
         normalized_candidate = _sanitize_match_fit_recruitability(normalized_candidate)
-        derived_decision = _derive_decision_from_fit_and_recruit(
-            normalized_candidate.get("match_fit", "medium"),
-            normalized_candidate.get("recruitability", "medium"),
-        )
-        if derived_decision != normalized_candidate["decision"]:
-            normalized_candidate["decision"] = derived_decision
-            normalized_candidate["_decision_overridden"] = True
-            # re-derive priority from corrected decision
-            if derived_decision == "no":
-                normalized_candidate["priority"] = "N"
-            elif derived_decision == "maybe":
-                normalized_candidate["priority"] = "C"
-            elif derived_decision == "yes":
-                normalized_candidate["priority"] = "B"
-            elif derived_decision == "strong_yes":
-                normalized_candidate["priority"] = "A"
-
-        # --- 硬规则守门：hard_mismatch 强制压 decision=no（最早执行，防止后续 tone cleanup 用错误 decision 误判）---
+        normalized_candidate = _apply_hard_constraints(normalized_candidate, input_data or {})
+        normalized_candidate = _apply_decision_matrix(normalized_candidate)
+        normalized_candidate = _maybe_override_final_decision(normalized_candidate, candidate)
         normalized_candidate = _apply_hard_mismatch_guard(normalized_candidate)
 
         # --- core_judgement 语气一致性清理（任何场景都执行，在 guard 之后） ---

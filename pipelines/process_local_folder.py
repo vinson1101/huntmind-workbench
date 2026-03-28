@@ -30,6 +30,7 @@ from adapters.local_adapter import LocalAdapter
 from core.batch_builder import BatchBuilder
 from core.candidate_store import CandidateStore
 from core.final_reporter import FinalReporter
+from core.jd_parser import normalize_jd_data
 from core.resume_ingest import ingest_resume_files
 from core.runner import run as run_output_processing
 
@@ -63,7 +64,8 @@ def process_local_folder(
     adapter = LocalAdapter()
     scan_result = adapter.scan_folder(folder_path, file_types=file_types or DEFAULT_FILE_TYPES)
     store = CandidateStore(run_dir)
-    batch_builder = BatchBuilder(jd_data)
+    normalized_jd = normalize_jd_data(jd_data)
+    batch_builder = BatchBuilder(normalized_jd)
     final_reporter = FinalReporter(run_dir)
 
     if scan_result["total_files"] == 0:
@@ -168,6 +170,9 @@ def process_local_folder(
     )
     owner_summary_path = final_reporter.save_owner_summary(
         runner_result["json"].get("top_recommendations", []),
+        jd_title=batch_input.get("jd", {}).get("title", "待确认"),
+        jd_location=batch_input.get("jd", {}).get("base_location", "") or batch_input.get("jd", {}).get("location", "待确认"),
+        jd_salary=batch_input.get("jd", {}).get("salary_range", "待确认"),
         filename="owner_summary.md",
     )
 

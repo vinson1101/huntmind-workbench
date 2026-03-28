@@ -41,7 +41,7 @@
 
           "priority": {
             "type": "string",
-            "enum": ["A", "B", "C"]
+            "enum": ["A", "B", "C", "N"]
           },
 
           "action_timing": {
@@ -51,6 +51,80 @@
 
           "core_judgement": {
             "type": "string"
+          },
+          "match_fit": {
+            "type": "string",
+            "enum": ["strong", "medium", "weak"]
+          },
+          "match_fit_reason": { "type": "string" },
+          "match_fit_breakdown": {
+            "type": "object",
+            "properties": {
+              "must_have_alignment": { "type": "string" },
+              "nice_to_have_alignment": { "type": "string" },
+              "functional_alignment": { "type": "string" },
+              "domain_alignment": { "type": "string" },
+              "seniority_alignment": { "type": "string" },
+              "evidence": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": true
+          },
+          "recruitability": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "recruitability_breakdown": {
+            "type": "object",
+            "properties": {
+              "compensation_feasibility": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "location_feasibility": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "seniority_fit": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              },
+              "eligibility_constraint": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "string", "enum": ["high", "medium", "low"] },
+                  "reason": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "mismatch_type": {
+            "type": "string",
+            "enum": ["none", "recoverable", "hard_mismatch"]
+          },
+          "hard_constraints": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "override_trace": {
+            "type": "array",
+            "items": { "type": "string" }
           },
 
           "reasons": {

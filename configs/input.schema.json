@@ -23,6 +23,23 @@
         },
         "salary_range": { "type": "string" },
         "location": { "type": "string" },
+        "base_location": { "type": "string" },
+        "seniority_level": { "type": "string" },
+        "reporting_line": { "type": "string" },
+        "language_requirements": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "eligibility_constraints": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "travel_or_relocation": { "type": "string" },
+        "industry_context": { "type": "string" },
+        "domain_tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
         "company_context": { "type": "string" },
         "priority_focus": {
           "type": "string",
