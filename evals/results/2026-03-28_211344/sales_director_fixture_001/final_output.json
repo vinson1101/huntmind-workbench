@@ -1,0 +1,155 @@
+{
+  "overall_diagnosis": "本批共处理1份简历，成功解析1份，其中0人进入推荐池；建议联系0人，备选观察0人，暂不推进1人。",
+  "batch_advice": "建议先完成推荐池候选人的首轮沟通，再根据验证结果决定是否继续推进。",
+  "top_recommendations": [
+    {
+      "candidate_id": "sales_001",
+      "rank": 1,
+      "candidate_name": "销售总监样本",
+      "name": "销售总监样本",
+      "role_label": "",
+      "total_score": 79.5,
+      "decision": "no",
+      "priority": "N",
+      "action_timing": "optional",
+      "structured_score": {
+        "dimension_scores": {
+          "hard_skill_match": 80.0,
+          "experience_depth": 80.0,
+          "innovation_potential": 75.0,
+          "execution_goal_breakdown": 80.0,
+          "team_fit": 75.0,
+          "willingness": 95.0,
+          "stability": 70.0
+        },
+        "dimension_evidence": {
+          "hard_skill_match": "",
+          "experience_depth": "",
+          "innovation_potential": "",
+          "execution_goal_breakdown": "",
+          "team_fit": "",
+          "willingness": "",
+          "stability": ""
+        },
+        "template_id": "sales_director",
+        "weighted_total": 79.5,
+        "weight_snapshot": {
+          "hard_skill_match": 30,
+          "experience_depth": 30,
+          "innovation_potential": 10,
+          "execution_goal_breakdown": 15,
+          "team_fit": 5,
+          "willingness": 5,
+          "stability": 5
+        }
+      },
+      "core_judgement": "judge candidate",
+      "reasons": [
+        "reason 1",
+        "reason 2",
+        "reason 3"
+      ],
+      "risks": [
+        "risk 1"
+      ],
+      "score_breakdown": {
+        "hard_skill": 80.0,
+        "experience": 80.0,
+        "stability": 70.0,
+        "potential": 77.5,
+        "conversion": 89.0
+      },
+      "match_fit": "low",
+      "recruitability": "medium",
+      "mismatch_type": "hard_mismatch",
+      "willingness": "high",
+      "match_fit_reason": "核心职能或关键 must_have 存在明显缺口，当前属于低匹配。 候选人文本还命中了排斥信号：产品经理。",
+      "match_fit_breakdown": {
+        "must_have_match": {
+          "level": "low",
+          "reason": "must_have 命中 0/2"
+        },
+        "nice_to_have_match": {
+          "level": "low",
+          "reason": "nice_to_have 命中 0/1"
+        },
+        "functional_fit": {
+          "level": "high",
+          "reason": "候选人文本命中目标模板信号 1/0，排斥信号 1"
+        },
+        "role_direction_fit": {
+          "level": "medium",
+          "reason": "候选人文本对 sales_director 方向有直接命中：销售"
+        },
+        "industry_relevance": {
+          "level": "medium",
+          "reason": "缺少明确行业/赛道命中证据"
+        },
+        "seniority_relevance": {
+          "level": "medium",
+          "reason": "层级承接度证据一般"
+        }
+      },
+      "recruitability_reason": "存在一定现实阻力或关键信息不足，需沟通进一步确认。",
+      "recruitability_breakdown": {
+        "compensation_feasibility": {
+          "level": "high",
+          "reason": "候选人薪资预期 35 对比 JD 范围 30-40K"
+        },
+        "location_feasibility": {
+          "level": "high",
+          "reason": "JD 地点 上海 与候选人地点 上海"
+        },
+        "seniority_fit": {
+          "level": "medium",
+          "reason": "候选人层级承接度需要进一步核验：senior"
+        },
+        "eligibility_constraint": {
+          "level": "medium",
+          "reason": "JD 未提供明确资格约束"
+        }
+      },
+      "hard_constraints": {
+        "triggered": false,
+        "issues": [],
+        "hard_issues": []
+      },
+      "decision_trace": {
+        "model_raw_decision": "yes",
+        "computed_match_fit": "low",
+        "computed_recruitability": "medium",
+        "mismatch_type": "hard_mismatch",
+        "hard_constraints": {
+          "triggered": false,
+          "issues": [],
+          "hard_issues": []
+        },
+        "matrix_path": "hard_block",
+        "final_decision": "no",
+        "override_reason": "action_timing:today->optional",
+        "downgrade_reason": "hard_mismatch overrides model decision"
+      },
+      "override_trace": [
+        "decision:yes->no",
+        "priority:A->N",
+        "action_timing:today->optional"
+      ],
+      "_matrix_path": "hard_block",
+      "model_decision": "yes",
+      "action": {
+        "should_contact": false,
+        "hook_message": "",
+        "verification_question": "",
+        "message_template": "",
+        "deep_questions": []
+      },
+      "identity_meta": {
+        "canonical_name": "销售总监样本",
+        "has_conflict": false,
+        "conflict_fields": [],
+        "alias_hits": [],
+        "resolution": "unchanged"
+      }
+    }
+  ]
+}

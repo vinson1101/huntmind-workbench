@@ -1,0 +1,53 @@
+{
+  "batch_id": "blockchain_lead_fixture_001",
+  "suite_name": "blockchain_lead",
+  "candidate_results": [
+    {
+      "candidate_id": "blockchain_001",
+      "human_should_contact": true,
+      "model_should_contact": true,
+      "human_priority": "A",
+      "model_priority": "C",
+      "human_decision": "strong_yes",
+      "model_decision": "maybe",
+      "human_match_fit": "high",
+      "model_match_fit": "low",
+      "human_recruitability": "high",
+      "model_recruitability": "medium",
+      "human_mismatch_type": "none",
+      "model_mismatch_type": "recoverable",
+      "human_primary_reason": "fit_and_reachable",
+      "model_primary_reason": "low_match_fit",
+      "is_contact_match": true,
+      "is_priority_match": false,
+      "is_decision_match": false,
+      "is_reason_match": false,
+      "main_gap": "priority_gap"
+    }
+  ],
+  "metrics": {
+    "contact_accuracy": 1.0,
+    "priority_accuracy": 0.0,
+    "decision_accuracy": 0.0,
+    "top3_hit_rate": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "reason_accuracy": 0.0,
+    "routing_error_count": 0
+  },
+  "hard_errors": {
+    "hard_mismatch_false_positive": 0,
+    "low_fit_high_willingness_promoted": 0,
+    "routing_error_count": 0,
+    "new_high_priority_false_positive": 0
+  },
+  "top3": {
+    "human_top_ids": [
+      "blockchain_001"
+    ],
+    "model_top_ids": [
+      "blockchain_001"
+    ],
+    "hit_count": 1
+  }
+}

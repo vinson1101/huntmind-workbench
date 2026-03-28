@@ -1,0 +1,22 @@
+{
+  "suite_names": [
+    "product",
+    "frontend_dev",
+    "blockchain_lead",
+    "sales_director"
+  ],
+  "results_root": "evals/results",
+  "score_weights": {
+    "contact_accuracy": 0.35,
+    "top3_hit_rate": 0.25,
+    "priority_accuracy": 0.20,
+    "reason_accuracy": 0.10,
+    "false_positive_penalty": 0.10
+  },
+  "hard_checks": {
+    "hard_mismatch_false_positive": true,
+    "low_fit_high_willingness_promoted": true,
+    "routing_error_count": true,
+    "new_high_priority_false_positive": true
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "suite_name": "blockchain_lead",
+  "batch_id": "blockchain_lead_fixture_001",
+  "metrics": {
+    "contact_accuracy": 1.0,
+    "priority_accuracy": 0.0,
+    "decision_accuracy": 0.0,
+    "top3_hit_rate": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "reason_accuracy": 0.0,
+    "routing_error_count": 0,
+    "score": 0.6
+  },
+  "hard_errors": {
+    "hard_mismatch_false_positive": 0,
+    "low_fit_high_willingness_promoted": 0,
+    "routing_error_count": 0,
+    "new_high_priority_false_positive": 0
+  },
+  "top3": {
+    "human_top_ids": [
+      "blockchain_001"
+    ],
+    "model_top_ids": [
+      "blockchain_001"
+    ],
+    "hit_count": 1
+  }
+}

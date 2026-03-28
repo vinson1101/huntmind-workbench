@@ -1,0 +1,159 @@
+{
+  "tag": "2026-03-28_211344",
+  "config": {
+    "suite_names": [
+      "product",
+      "frontend_dev",
+      "blockchain_lead",
+      "sales_director"
+    ],
+    "results_root": "evals/results",
+    "score_weights": {
+      "contact_accuracy": 0.35,
+      "top3_hit_rate": 0.25,
+      "priority_accuracy": 0.2,
+      "reason_accuracy": 0.1,
+      "false_positive_penalty": 0.1
+    },
+    "hard_checks": {
+      "hard_mismatch_false_positive": true,
+      "low_fit_high_willingness_promoted": true,
+      "routing_error_count": true,
+      "new_high_priority_false_positive": true
+    }
+  },
+  "batches": [
+    {
+      "suite_name": "product",
+      "batch_id": "product_manager_batch_001",
+      "metrics": {
+        "contact_accuracy": 0.5,
+        "priority_accuracy": 0.4167,
+        "decision_accuracy": 0.4167,
+        "top3_hit_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.5,
+        "reason_accuracy": 0.25,
+        "routing_error_count": 0,
+        "score": 0.2833
+      },
+      "hard_errors": {
+        "hard_mismatch_false_positive": 0,
+        "low_fit_high_willingness_promoted": 0,
+        "routing_error_count": 0,
+        "new_high_priority_false_positive": 0
+      },
+      "top3": {
+        "human_top_ids": [
+          "local_runs_run_20260323_214437_inbox_11_15K_6_邢威峰",
+          "local_runs_run_20260323_214437_inbox_8_13K_5_李蓓"
+        ],
+        "model_top_ids": [],
+        "hit_count": 0
+      }
+    },
+    {
+      "suite_name": "frontend_dev",
+      "batch_id": "frontend_dev_fixture_001",
+      "metrics": {
+        "contact_accuracy": 1.0,
+        "priority_accuracy": 0.0,
+        "decision_accuracy": 1.0,
+        "top3_hit_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "reason_accuracy": 1.0,
+        "routing_error_count": 0,
+        "score": 0.7
+      },
+      "hard_errors": {
+        "hard_mismatch_false_positive": 0,
+        "low_fit_high_willingness_promoted": 0,
+        "routing_error_count": 0,
+        "new_high_priority_false_positive": 0
+      },
+      "top3": {
+        "human_top_ids": [
+          "frontend_001"
+        ],
+        "model_top_ids": [
+          "frontend_001"
+        ],
+        "hit_count": 1
+      }
+    },
+    {
+      "suite_name": "blockchain_lead",
+      "batch_id": "blockchain_lead_fixture_001",
+      "metrics": {
+        "contact_accuracy": 1.0,
+        "priority_accuracy": 0.0,
+        "decision_accuracy": 0.0,
+        "top3_hit_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "reason_accuracy": 0.0,
+        "routing_error_count": 0,
+        "score": 0.6
+      },
+      "hard_errors": {
+        "hard_mismatch_false_positive": 0,
+        "low_fit_high_willingness_promoted": 0,
+        "routing_error_count": 0,
+        "new_high_priority_false_positive": 0
+      },
+      "top3": {
+        "human_top_ids": [
+          "blockchain_001"
+        ],
+        "model_top_ids": [
+          "blockchain_001"
+        ],
+        "hit_count": 1
+      }
+    },
+    {
+      "suite_name": "sales_director",
+      "batch_id": "sales_director_fixture_001",
+      "metrics": {
+        "contact_accuracy": 1.0,
+        "priority_accuracy": 1.0,
+        "decision_accuracy": 1.0,
+        "top3_hit_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "reason_accuracy": 1.0,
+        "routing_error_count": 0,
+        "score": 0.65
+      },
+      "hard_errors": {
+        "hard_mismatch_false_positive": 0,
+        "low_fit_high_willingness_promoted": 0,
+        "routing_error_count": 0,
+        "new_high_priority_false_positive": 0
+      },
+      "top3": {
+        "human_top_ids": [],
+        "model_top_ids": [],
+        "hit_count": 0
+      }
+    }
+  ],
+  "global_metrics": {
+    "contact_accuracy": 0.875,
+    "priority_accuracy": 0.3542,
+    "decision_accuracy": 0.6042,
+    "top3_hit_rate": 0.5,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.125,
+    "reason_accuracy": 0.5625,
+    "routing_error_count": 0,
+    "score": 0.5583
+  },
+  "hard_errors": {
+    "hard_mismatch_false_positive": 0,
+    "low_fit_high_willingness_promoted": 0,
+    "routing_error_count": 0,
+    "new_high_priority_false_positive": 0
+  }
+}

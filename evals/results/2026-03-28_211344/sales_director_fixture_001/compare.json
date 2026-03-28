@@ -1,0 +1,49 @@
+{
+  "batch_id": "sales_director_fixture_001",
+  "suite_name": "sales_director",
+  "candidate_results": [
+    {
+      "candidate_id": "sales_001",
+      "human_should_contact": false,
+      "model_should_contact": false,
+      "human_priority": "N",
+      "model_priority": "N",
+      "human_decision": "no",
+      "model_decision": "no",
+      "human_match_fit": "low",
+      "model_match_fit": "low",
+      "human_recruitability": "high",
+      "model_recruitability": "medium",
+      "human_mismatch_type": "hard_mismatch",
+      "model_mismatch_type": "hard_mismatch",
+      "human_primary_reason": "hard_mismatch",
+      "model_primary_reason": "hard_mismatch",
+      "is_contact_match": true,
+      "is_priority_match": true,
+      "is_decision_match": true,
+      "is_reason_match": true,
+      "main_gap": "recruitability_gap"
+    }
+  ],
+  "metrics": {
+    "contact_accuracy": 1.0,
+    "priority_accuracy": 1.0,
+    "decision_accuracy": 1.0,
+    "top3_hit_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "reason_accuracy": 1.0,
+    "routing_error_count": 0
+  },
+  "hard_errors": {
+    "hard_mismatch_false_positive": 0,
+    "low_fit_high_willingness_promoted": 0,
+    "routing_error_count": 0,
+    "new_high_priority_false_positive": 0
+  },
+  "top3": {
+    "human_top_ids": [],
+    "model_top_ids": [],
+    "hit_count": 0
+  }
+}

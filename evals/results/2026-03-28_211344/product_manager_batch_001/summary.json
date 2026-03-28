@@ -1,0 +1,29 @@
+{
+  "suite_name": "product",
+  "batch_id": "product_manager_batch_001",
+  "metrics": {
+    "contact_accuracy": 0.5,
+    "priority_accuracy": 0.4167,
+    "decision_accuracy": 0.4167,
+    "top3_hit_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.5,
+    "reason_accuracy": 0.25,
+    "routing_error_count": 0,
+    "score": 0.2833
+  },
+  "hard_errors": {
+    "hard_mismatch_false_positive": 0,
+    "low_fit_high_willingness_promoted": 0,
+    "routing_error_count": 0,
+    "new_high_priority_false_positive": 0
+  },
+  "top3": {
+    "human_top_ids": [
+      "local_runs_run_20260323_214437_inbox_11_15K_6_邢威峰",
+      "local_runs_run_20260323_214437_inbox_8_13K_5_李蓓"
+    ],
+    "model_top_ids": [],
+    "hit_count": 0
+  }
+}

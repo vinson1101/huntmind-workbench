@@ -1,0 +1,26 @@
+{
+  "suite_name": "sales_director",
+  "batch_id": "sales_director_fixture_001",
+  "metrics": {
+    "contact_accuracy": 1.0,
+    "priority_accuracy": 1.0,
+    "decision_accuracy": 1.0,
+    "top3_hit_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "reason_accuracy": 1.0,
+    "routing_error_count": 0,
+    "score": 0.65
+  },
+  "hard_errors": {
+    "hard_mismatch_false_positive": 0,
+    "low_fit_high_willingness_promoted": 0,
+    "routing_error_count": 0,
+    "new_high_priority_false_positive": 0
+  },
+  "top3": {
+    "human_top_ids": [],
+    "model_top_ids": [],
+    "hit_count": 0
+  }
+}

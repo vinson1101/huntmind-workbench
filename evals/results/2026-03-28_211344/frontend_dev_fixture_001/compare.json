@@ -1,0 +1,53 @@
+{
+  "batch_id": "frontend_dev_fixture_001",
+  "suite_name": "frontend_dev",
+  "candidate_results": [
+    {
+      "candidate_id": "frontend_001",
+      "human_should_contact": true,
+      "model_should_contact": true,
+      "human_priority": "A",
+      "model_priority": "B",
+      "human_decision": "yes",
+      "model_decision": "yes",
+      "human_match_fit": "high",
+      "model_match_fit": "high",
+      "human_recruitability": "high",
+      "model_recruitability": "medium",
+      "human_mismatch_type": "none",
+      "model_mismatch_type": "none",
+      "human_primary_reason": "fit_and_reachable",
+      "model_primary_reason": "fit_and_reachable",
+      "is_contact_match": true,
+      "is_priority_match": false,
+      "is_decision_match": true,
+      "is_reason_match": true,
+      "main_gap": "priority_gap"
+    }
+  ],
+  "metrics": {
+    "contact_accuracy": 1.0,
+    "priority_accuracy": 0.0,
+    "decision_accuracy": 1.0,
+    "top3_hit_rate": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "reason_accuracy": 1.0,
+    "routing_error_count": 0
+  },
+  "hard_errors": {
+    "hard_mismatch_false_positive": 0,
+    "low_fit_high_willingness_promoted": 0,
+    "routing_error_count": 0,
+    "new_high_priority_false_positive": 0
+  },
+  "top3": {
+    "human_top_ids": [
+      "frontend_001"
+    ],
+    "model_top_ids": [
+      "frontend_001"
+    ],
+    "hit_count": 1
+  }
+}
