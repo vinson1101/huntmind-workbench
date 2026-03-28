@@ -1033,6 +1033,26 @@ def _extract_salary_numbers(text: str) -> List[int]:
     return numbers[:2]
 
 
+def _collect_signal_hits(text: str, signals: List[str]) -> List[str]:
+    lowered = text.lower()
+    hits: List[str] = []
+    for signal in signals:
+        normalized = _clean_text(signal)
+        if normalized and normalized.lower() in lowered:
+            hits.append(normalized)
+    return hits
+
+
+def _get_template_signal_profile(template_id: str) -> Dict[str, List[str]]:
+    template = _load_scoring_templates().get("templates", {}).get(template_id, {})
+    routing = template.get("routing", {}) if isinstance(template, dict) else {}
+    return {
+        "strong": _clean_str_list(routing.get("strong_signals")),
+        "weak": _clean_str_list(routing.get("weak_signals")),
+        "exclude": _clean_str_list(routing.get("exclude_signals")),
+    }
+
+
 def _compute_match_fit(
     candidate: Dict[str, Any],
     source_candidate: Dict[str, Any],
@@ -1047,10 +1067,12 @@ def _compute_match_fit(
     must_hits = [item for item in must_have if item and item.lower() in text]
     nice_hits = [item for item in nice_to_have if item and item.lower() in text]
 
-    template_id = _clean_text(candidate.get("structured_score", {}).get("template_id"))
     route_meta = identify_sequence_with_meta(jd["title"]) if jd["title"] else None
-    role_alignment = route_meta.template_id == template_id if route_meta else True
-
+    target_template = route_meta.template_id if route_meta else _clean_text(candidate.get("structured_score", {}).get("template_id"))
+    signal_profile = _get_template_signal_profile(target_template)
+    strong_hits = _collect_signal_hits(text, signal_profile["strong"])
+    weak_hits = _collect_signal_hits(text, signal_profile["weak"])
+    exclude_hits = _collect_signal_hits(text, signal_profile["exclude"])
     domain_hits = [tag for tag in jd["domain_tags"] if tag and tag.lower() in text]
     seniority_alignment = True
     if jd["seniority_level"]:
@@ -1058,14 +1080,27 @@ def _compute_match_fit(
 
     must_ratio = len(must_hits) / len(must_have) if must_have else 0.5
     nice_ratio = len(nice_hits) / len(nice_to_have) if nice_to_have else 0.5
-    role_score = 1.0 if role_alignment else 0.0
     domain_score = len(domain_hits) / len(jd["domain_tags"]) if jd["domain_tags"] else 0.5
-    seniority_score = 1.0 if seniority_alignment else 0.35
 
     must_level = _level_from_score(must_ratio, high_cutoff=0.75, medium_cutoff=0.35)
     nice_level = _level_from_score(nice_ratio, high_cutoff=0.6, medium_cutoff=0.25)
-    functional_level = "high" if role_alignment else "low"
-    role_direction_level = "high" if role_alignment else ("medium" if route_meta and route_meta.confidence < 0.75 else "low")
+    positive_signal_count = len(strong_hits) * 2 + len(weak_hits)
+    exclude_signal_count = len(exclude_hits)
+    if exclude_signal_count > 0 and positive_signal_count == 0:
+        functional_level = "low"
+    elif len(strong_hits) > 0:
+        functional_level = "high"
+    elif positive_signal_count > 0 or must_level != "low":
+        functional_level = "medium"
+    else:
+        functional_level = "low"
+
+    if len(strong_hits) > 0 and (must_hits or jd["must_have"] == []):
+        role_direction_level = "high"
+    elif positive_signal_count > 0 or must_level != "low" or nice_level != "low":
+        role_direction_level = "medium"
+    else:
+        role_direction_level = "low"
     industry_level = _level_from_score(domain_score, high_cutoff=0.6, medium_cutoff=0.25)
     seniority_level = "high" if seniority_alignment else "medium"
 
@@ -1074,18 +1109,22 @@ def _compute_match_fit(
 
     if mismatch_type == "hard_mismatch" or missing_core_must_have or functional_level == "low":
         overall = "low"
-    elif must_level != "low" and functional_level == "high" and role_direction_level in {"high", "medium"} and mismatch_type != "recoverable":
+    elif must_level != "low" and functional_level in {"high", "medium"} and role_direction_level in {"high", "medium"} and mismatch_type != "recoverable":
         overall = "high"
     else:
         overall = "medium"
 
     must_reason = f"must_have 命中 {len(must_hits)}/{len(must_have) or 1}" if must_have else "JD 未给出明确 must_have"
     nice_reason = f"nice_to_have 命中 {len(nice_hits)}/{len(nice_to_have) or 1}" if nice_to_have else "JD 未给出明确 nice_to_have"
-    functional_reason = "核心职能与岗位模板一致" if role_alignment else "核心职能与岗位模板不一致"
+    functional_reason = (
+        f"候选人文本命中目标模板信号 {len(strong_hits)}/{len(weak_hits)}，排斥信号 {len(exclude_hits)}"
+        if target_template
+        else "缺少明确模板信号"
+    )
     role_direction_reason = (
-        f"岗位方向与模板路由一致: {template_id or 'unknown'}"
-        if role_alignment
-        else f"岗位方向存在偏差，JD 更接近 {route_meta.template_id if route_meta else 'unknown'}"
+        f"候选人文本对 {target_template or 'unknown'} 方向有直接命中：{'/'.join(strong_hits[:3] or weak_hits[:3])}"
+        if positive_signal_count > 0
+        else f"候选人文本缺少 {target_template or 'unknown'} 方向的直接证据"
     )
     industry_reason = (
         f"行业/赛道标签命中 {'/'.join(domain_hits[:3])}" if domain_hits else "缺少明确行业/赛道命中证据"
@@ -1102,6 +1141,8 @@ def _compute_match_fit(
         summary_reason = "核心职能与岗位方向基本相关，但关键要求仍有缺口，需进一步核验。"
     if mismatch_type == "recoverable":
         summary_reason += " 当前更接近 recoverable mismatch。"
+    if exclude_hits and overall != "high":
+        summary_reason += f" 候选人文本还命中了排斥信号：{'/'.join(exclude_hits[:3])}。"
 
     return {
         "match_fit": overall,
@@ -1128,12 +1169,9 @@ def _judge_mismatch_type(
 
     jd = _extract_jd_constraints(input_data)
     route_template = identify_sequence_with_meta(jd["title"]).template_id if jd["title"] else ""
-    current_template = _clean_text(candidate.get("structured_score", {}).get("template_id"))
     text = _extract_candidate_context(candidate, source_candidate)["text"]
     negative_signals = ["不匹配", "角色错位", "转岗", "缺乏", "不足", "非目标岗位"]
 
-    if route_template and current_template and route_template != current_template:
-        return "hard_mismatch"
     if any(signal in text for signal in negative_signals):
         return "hard_mismatch"
 
@@ -1143,6 +1181,15 @@ def _judge_mismatch_type(
         if hits == 0:
             return "hard_mismatch"
         if hits < len(must_have):
+            return "recoverable"
+
+    if route_template:
+        signal_profile = _get_template_signal_profile(route_template)
+        positive_hits = _collect_signal_hits(text, signal_profile["strong"]) + _collect_signal_hits(text, signal_profile["weak"])
+        exclude_hits = _collect_signal_hits(text, signal_profile["exclude"])
+        if exclude_hits and not positive_hits:
+            return "hard_mismatch"
+        if exclude_hits and positive_hits:
             return "recoverable"
 
     return "none"
@@ -1292,8 +1339,10 @@ def _apply_decision_matrix(candidate: Dict[str, Any]) -> Dict[str, Any]:
 
     if mismatch_type == "hard_mismatch" or hard_constraints.get("triggered"):
         decision = "no"
+        matrix_path = "hard_block"
     else:
         decision = _derive_decision_from_fit_and_recruit(match_fit, recruitability)
+        matrix_path = f"{match_fit}_x_{recruitability}"
 
     if decision == "strong_yes":
         priority = "A"
@@ -1311,6 +1360,7 @@ def _apply_decision_matrix(candidate: Dict[str, Any]) -> Dict[str, Any]:
     candidate["decision"] = decision
     candidate["priority"] = priority
     candidate["action_timing"] = timing
+    candidate["_matrix_path"] = matrix_path
     return candidate
 
 
@@ -1331,9 +1381,19 @@ def _maybe_override_final_decision(candidate: Dict[str, Any], model_candidate: D
         "computed_match_fit": _clean_text(candidate.get("match_fit")),
         "computed_recruitability": _clean_text(candidate.get("recruitability")),
         "mismatch_type": _clean_text(candidate.get("mismatch_type")),
+        "hard_constraints": candidate.get("hard_constraints", {}),
+        "matrix_path": _clean_text(candidate.get("_matrix_path")),
         "final_decision": _clean_text(candidate.get("decision")),
         "override_reason": trace[-1] if trace else "",
     }
+    if candidate.get("mismatch_type") == "hard_mismatch":
+        candidate["decision_trace"]["downgrade_reason"] = "hard_mismatch overrides model decision"
+    elif candidate.get("hard_constraints", {}).get("triggered"):
+        candidate["decision_trace"]["downgrade_reason"] = "hard_constraints triggered"
+    elif candidate.get("match_fit") == "high" and candidate.get("recruitability") == "low":
+        candidate["decision_trace"]["downgrade_reason"] = "high fit but low recruitability"
+    elif candidate.get("match_fit") == "low":
+        candidate["decision_trace"]["downgrade_reason"] = "low match_fit blocks promotion"
     return candidate
 
 

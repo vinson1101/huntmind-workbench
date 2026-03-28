@@ -23,18 +23,26 @@ DEFAULT_JD_FIELDS = {
 }
 
 LOCATION_HINTS = [
-    "北京", "上海", "深圳", "广州", "杭州", "宁波", "香港", "新加坡", "成都", "苏州", "南京",
+    "北京",
+    "上海",
+    "深圳",
+    "广州",
+    "杭州",
+    "宁波",
+    "香港",
+    "新加坡",
+    "成都",
+    "苏州",
+    "南京",
 ]
 LANGUAGE_HINTS = ["英语", "英文", "普通话", "粤语", "日语", "韩语"]
 ELIGIBILITY_HINTS = ["签证", "身份", "工作资格", "合法工作", "IANG", "香港身份", "居留"]
-DOMAIN_HINTS = [
-    "区块链", "crypto", "web3", "交易所", "钱包", "ai", "saas", "金融", "电商", "医疗", "汽车",
-]
+DOMAIN_HINTS = ["区块链", "crypto", "web3", "交易所", "钱包", "ai", "saas", "金融", "电商", "医疗", "汽车"]
 SENIORITY_HINTS = {
     "intern": ["实习"],
     "junior": ["专员", "助理", "初级", "junior"],
     "mid": ["经理", "主管", "mid"],
-    "senior": ["高级", "资深", "总监", "负责人", "leader", "director", "head", "vp"],
+    "senior": ["高级", "资深", "总监", "senior"],
 }
 
 
@@ -50,7 +58,7 @@ def _clean_str_list(value: Any) -> List[str]:
     text = _clean_text(value)
     if not text:
         return []
-    return [part.strip() for part in re.split(r"[\n;,，；、]+", text) if part.strip()]
+    return [part.strip() for part in re.split(r"[\n,;，；、]+", text) if part.strip()]
 
 
 def _infer_salary_range(text: str) -> str:
@@ -77,34 +85,33 @@ def _infer_seniority(text: str) -> str:
 
 
 def _infer_reporting_line(text: str) -> str:
-    match = re.search(r"(汇报对象|汇报给|report to|reporting to)[:：]?\s*([^\n。；;]{1,40})", text, flags=re.IGNORECASE)
+    match = re.search(r"(汇报对象|汇报线|report to|reporting to)[:：]?\s*([^\n。；;]{1,40})", text, flags=re.IGNORECASE)
     if match:
         return _clean_text(match.group(2))
     return ""
 
 
 def _infer_language_requirements(text: str) -> List[str]:
-    return [hint for hint in LANGUAGE_HINTS if hint.lower() in text.lower()]
+    lowered = text.lower()
+    return [hint for hint in LANGUAGE_HINTS if hint.lower() in lowered]
 
 
 def _infer_eligibility_constraints(text: str) -> List[str]:
-    return [hint for hint in ELIGIBILITY_HINTS if hint.lower() in text.lower()]
+    lowered = text.lower()
+    return [hint for hint in ELIGIBILITY_HINTS if hint.lower() in lowered]
 
 
 def _infer_travel_or_relocation(text: str) -> str:
+    lowered = text.lower()
     for hint in ["可出差", "接受出差", "接受搬迁", "relocation", "travel", "onsite", "驻场"]:
-        if hint.lower() in text.lower():
+        if hint.lower() in lowered:
             return hint
     return ""
 
 
 def _infer_domain_tags(text: str) -> List[str]:
-    tags: List[str] = []
     lowered = text.lower()
-    for hint in DOMAIN_HINTS:
-        if hint.lower() in lowered:
-            tags.append(hint)
-    return tags
+    return [hint for hint in DOMAIN_HINTS if hint.lower() in lowered]
 
 
 def normalize_jd_data(jd_data: Any) -> Dict[str, Any]:

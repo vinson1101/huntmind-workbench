@@ -7,7 +7,6 @@ routing:
       - product manager
       - 产品经理
       - 产品总监
-      - 项目经理
       - ai产品
     rd_engineer:
       - engineer
@@ -74,6 +73,7 @@ templates:
         - KOL
         - 渠道资源
         - 市场拓展
+        - 项目经理
     must_focus_signals:
       - requirement analysis
       - product planning
