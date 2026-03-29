@@ -102,24 +102,24 @@
       "name": "王秀斌",
       "source_file": "王秀斌_区块链技术专家.pdf",
       "rank": 4,
-      "decision": "maybe",
-      "match_fit": "medium",
+      "decision": "yes",
+      "match_fit": "high",
       "recruitability": "medium",
-      "mismatch_type": "recoverable",
+      "mismatch_type": "none",
       "willingness": "medium",
-      "total_score": 48.0,
-      "action_timing": "this_week",
+      "total_score": 58.0,
+      "action_timing": "now",
       "core_judgement": "3年区块链经验有联盟链开发背景",
       "reasons": [
-        "3年+区块链行业经验，联盟链/公链开发经验",
-        "有区块链核心开发能力，技术栈有一定覆盖",
-        "工作经历与区块链行业相关"
+        "3年+区块链行业经验，联盟链/公链开发经验，有区块链核心技术能力",
+        "有区块链核心开发经验，技术栈有一定覆盖",
+        "工作经历与区块链行业相关，有实际项目落地"
       ],
       "risks": [
         "技术深度有限，DeFi/NFT核心能力待核验",
         "可能不是最优选择"
       ],
-      "priority": "B",
+      "priority": "A",
       "action": {
         "message_template": "您好王先生，看到您有区块链开发经验，我们在招聘区块链业务负责人，想了解一下您目前是否在看新机会。",
         "deep_questions": [
