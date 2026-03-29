@@ -3,6 +3,10 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List
 
+# Thin JD normalizer only.
+# It sanitizes/normalizes legacy JD input and provides lightweight fallback extraction.
+# It is not the primary JD semantic understanding layer; HuntMind owns that responsibility.
+
 
 DEFAULT_JD_FIELDS = {
     "title": "",
@@ -115,6 +119,14 @@ def _infer_domain_tags(text: str) -> List[str]:
 
 
 def normalize_jd_data(jd_data: Any) -> Dict[str, Any]:
+    """
+    Normalize incoming JD payload into a stable batch_input shape.
+
+    This function is intentionally lightweight:
+    - normalize/sanitize known fields
+    - provide minimal fallback extraction for compatibility
+    - avoid acting as the main JD intelligence/parsing layer
+    """
     if isinstance(jd_data, str):
         jd_data = {"title": jd_data}
     if not isinstance(jd_data, dict):

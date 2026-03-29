@@ -1026,6 +1026,73 @@ def _sanitize_match_fit_recruitability(candidate: Dict[str, Any]) -> Dict[str, A
     return candidate
 
 
+def _normalize_optional_choice(value: Any, valid_values: set[str]) -> str:
+    text = _clean_text(value).lower()
+    return text if text in valid_values else ""
+
+
+def _normalize_optional_priority(value: Any) -> str:
+    text = _clean_text(value).upper()
+    return text if text in VALID_PRIORITIES else ""
+
+
+def _normalize_optional_breakdown(value: Any) -> Dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _default_priority_for_decision(decision: str) -> str:
+    if decision == "strong_yes":
+        return "A"
+    if decision == "yes":
+        return "B"
+    if decision == "maybe":
+        return "C"
+    return "N"
+
+
+def _default_timing_for_decision(decision: str) -> str:
+    if decision == "strong_yes":
+        return "today"
+    if decision == "yes":
+        return "this_week"
+    return "optional"
+
+
+def _build_runner_review(
+    candidate: Dict[str, Any],
+    source_candidate: Dict[str, Any],
+    input_data: Dict[str, Any],
+) -> Dict[str, Any]:
+    review_candidate = dict(candidate)
+    review_mismatch_type = _judge_mismatch_type(review_candidate, source_candidate, input_data)
+    review_candidate["mismatch_type"] = review_mismatch_type
+    match_fit_payload = _compute_match_fit(review_candidate, source_candidate, input_data)
+    review_candidate.update(match_fit_payload)
+    recruitability_payload = _compute_recruitability(review_candidate, source_candidate, input_data)
+    review_candidate.update(recruitability_payload)
+    review_candidate = _apply_hard_constraints(review_candidate, input_data)
+
+    if review_mismatch_type == "hard_mismatch" or review_candidate.get("hard_constraints", {}).get("triggered"):
+        review_decision = "no"
+    else:
+        review_decision = _derive_decision_from_fit_and_recruit(
+            match_fit_payload.get("match_fit", "medium"),
+            recruitability_payload.get("recruitability", "medium"),
+        )
+
+    return {
+        "match_fit": match_fit_payload.get("match_fit", "medium"),
+        "match_fit_reason": _clean_text(match_fit_payload.get("match_fit_reason")),
+        "match_fit_breakdown": _normalize_optional_breakdown(match_fit_payload.get("match_fit_breakdown")),
+        "recruitability": recruitability_payload.get("recruitability", "medium"),
+        "recruitability_reason": _clean_text(recruitability_payload.get("recruitability_reason")),
+        "recruitability_breakdown": _normalize_optional_breakdown(recruitability_payload.get("recruitability_breakdown")),
+        "mismatch_type": review_mismatch_type,
+        "decision_suggestion": review_decision,
+        "hard_constraints": review_candidate.get("hard_constraints", {}),
+    }
+
+
 def _extract_salary_numbers(text: str) -> List[int]:
     if not text:
         return []
@@ -1297,7 +1364,10 @@ def _compute_recruitability(
 
 def _apply_hard_constraints(candidate: Dict[str, Any], input_data: Dict[str, Any]) -> Dict[str, Any]:
     jd = _extract_jd_constraints(input_data)
-    breakdown = candidate.get("recruitability_breakdown", {})
+    runner_review = candidate.get("runner_review", {}) if isinstance(candidate.get("runner_review"), dict) else {}
+    breakdown = runner_review.get("recruitability_breakdown", {})
+    if not isinstance(breakdown, dict) or not breakdown:
+        breakdown = candidate.get("recruitability_breakdown", {})
     issues: List[str] = []
     hard_issues: List[str] = []
 
@@ -1364,36 +1434,91 @@ def _apply_decision_matrix(candidate: Dict[str, Any]) -> Dict[str, Any]:
     return candidate
 
 
-def _maybe_override_final_decision(candidate: Dict[str, Any], model_candidate: Dict[str, Any]) -> Dict[str, Any]:
+def _maybe_override_final_decision(candidate: Dict[str, Any]) -> Dict[str, Any]:
     trace = list(candidate.get("override_trace") or [])
-    model_decision = _clean_text(model_candidate.get("decision"))
-    if model_decision and model_decision != candidate.get("decision"):
-        trace.append(f"decision:{model_decision}->{candidate.get('decision')}")
-    for field in ("priority", "action_timing"):
-        model_value = _clean_text(model_candidate.get(field))
-        final_value = _clean_text(candidate.get(field))
-        if model_value and model_value != final_value:
-            trace.append(f"{field}:{model_value}->{final_value}")
+    runner_review = candidate.get("runner_review", {}) if isinstance(candidate.get("runner_review"), dict) else {}
+    hard_constraints = candidate.get("hard_constraints", {})
+    override_reason = ""
+    override_applied = False
+
+    invalid_fields = []
+    if candidate.get("decision") not in VALID_DECISIONS:
+        invalid_fields.append("decision")
+        candidate["decision"] = runner_review.get("decision_suggestion", "maybe")
+    if candidate.get("priority") not in VALID_PRIORITIES:
+        invalid_fields.append("priority")
+        candidate["priority"] = _default_priority_for_decision(candidate.get("decision", "maybe"))
+    if candidate.get("action_timing") not in VALID_TIMINGS:
+        invalid_fields.append("action_timing")
+        candidate["action_timing"] = _default_timing_for_decision(candidate.get("decision", "maybe"))
+    if candidate.get("match_fit") not in VALID_MATCH_FITS:
+        invalid_fields.append("match_fit")
+        candidate["match_fit"] = runner_review.get("match_fit", "medium")
+        candidate["match_fit_reason"] = _clean_text(candidate.get("match_fit_reason")) or _clean_text(
+            runner_review.get("match_fit_reason")
+        )
+        candidate["match_fit_breakdown"] = candidate.get("match_fit_breakdown") or runner_review.get(
+            "match_fit_breakdown", {}
+        )
+    if candidate.get("recruitability") not in VALID_RECRUITABILITIES:
+        invalid_fields.append("recruitability")
+        candidate["recruitability"] = runner_review.get("recruitability", "medium")
+        candidate["recruitability_reason"] = _clean_text(candidate.get("recruitability_reason")) or _clean_text(
+            runner_review.get("recruitability_reason")
+        )
+        candidate["recruitability_breakdown"] = candidate.get("recruitability_breakdown") or runner_review.get(
+            "recruitability_breakdown", {}
+        )
+    if candidate.get("mismatch_type") not in VALID_MISMATCH_TYPES:
+        invalid_fields.append("mismatch_type")
+        candidate["mismatch_type"] = runner_review.get("mismatch_type", "none")
+    if candidate.get("willingness") not in {"high", "medium", "low", "unknown"}:
+        invalid_fields.append("willingness")
+        candidate["willingness"] = "unknown"
+
+    if invalid_fields:
+        override_applied = True
+        override_reason = f"missing_or_invalid_fields:{','.join(invalid_fields)}"
+        trace.append(override_reason)
+
+    review_mismatch = _clean_text(runner_review.get("mismatch_type"))
+    if review_mismatch == "hard_mismatch":
+        override_applied = True
+        override_reason = "hard_mismatch guardrail"
+        candidate["decision"] = "no"
+        candidate["priority"] = "N"
+        candidate["action_timing"] = "optional"
+        candidate["mismatch_type"] = "hard_mismatch"
+        trace.append("decision:guardrail->no")
+
+    if hard_constraints.get("triggered"):
+        override_applied = True
+        override_reason = "hard_constraints guardrail"
+        candidate["decision"] = "no"
+        candidate["priority"] = "N"
+        candidate["action_timing"] = "optional"
+        trace.append("decision:hard_constraints->no")
+
+    if override_applied:
+        action = candidate.get("action") or {}
+        if candidate.get("decision") == "no":
+            action["should_contact"] = False
+        candidate["action"] = action
+
     candidate["override_trace"] = trace
-    candidate["model_decision"] = model_decision
     candidate["decision_trace"] = {
-        "model_raw_decision": model_decision or _clean_text(candidate.get("decision")),
-        "computed_match_fit": _clean_text(candidate.get("match_fit")),
-        "computed_recruitability": _clean_text(candidate.get("recruitability")),
-        "mismatch_type": _clean_text(candidate.get("mismatch_type")),
-        "hard_constraints": candidate.get("hard_constraints", {}),
-        "matrix_path": _clean_text(candidate.get("_matrix_path")),
+        "model_raw_decision": _clean_text(candidate.get("model_decision")),
+        "model_match_fit": _clean_text(candidate.get("model_match_fit")),
+        "model_recruitability": _clean_text(candidate.get("model_recruitability")),
+        "model_mismatch_type": _clean_text(candidate.get("model_mismatch_type")),
+        "runner_review_match_fit": _clean_text(runner_review.get("match_fit")),
+        "runner_review_recruitability": _clean_text(runner_review.get("recruitability")),
+        "runner_review_mismatch_type": _clean_text(runner_review.get("mismatch_type")),
+        "hard_constraints": hard_constraints,
+        "override_applied": override_applied,
+        "override_reason": override_reason,
         "final_decision": _clean_text(candidate.get("decision")),
-        "override_reason": trace[-1] if trace else "",
     }
-    if candidate.get("mismatch_type") == "hard_mismatch":
-        candidate["decision_trace"]["downgrade_reason"] = "hard_mismatch overrides model decision"
-    elif candidate.get("hard_constraints", {}).get("triggered"):
-        candidate["decision_trace"]["downgrade_reason"] = "hard_constraints triggered"
-    elif candidate.get("match_fit") == "high" and candidate.get("recruitability") == "low":
-        candidate["decision_trace"]["downgrade_reason"] = "high fit but low recruitability"
-    elif candidate.get("match_fit") == "low":
-        candidate["decision_trace"]["downgrade_reason"] = "low match_fit blocks promotion"
     return candidate
 
 
@@ -1819,34 +1944,21 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
         structured_score = _process_structured_score(candidate, source_candidate, input_data or {})
         total_score = _clamp_score(candidate.get("total_score"), default=0)
 
-        decision = candidate.get("decision")
-        if decision not in VALID_DECISIONS:
-            decision = "maybe"
+        raw_model_decision = _clean_text(candidate.get("decision")).lower()
+        raw_model_priority = _clean_text(candidate.get("priority")).upper()
+        raw_model_action_timing = _clean_text(candidate.get("action_timing")).lower()
+        raw_model_match_fit = _clean_text(candidate.get("match_fit")).lower()
+        raw_model_recruitability = _clean_text(candidate.get("recruitability")).lower()
+        raw_model_willingness = _clean_text(candidate.get("willingness")).lower()
+        raw_model_mismatch_type = _clean_text(candidate.get("mismatch_type")).lower()
 
-        # P5: 模型原始 priority 仅作参考，gate 强制降级
-        model_priority = candidate.get("priority")
-        if model_priority not in VALID_PRIORITIES:
-            model_priority = "C"
-        if model_priority == "A":
-            # 只有通过 gate 才能保持 A，否则降为 B
-            gated_priority = _apply_template_gates(structured_score, structured_score.get("template_id", ""))
-            if gated_priority != "A":
-                model_priority = "B"
-        # Task 4: decision 与 priority 强绑定
-        if decision == "no":
-            priority = "N"
-        elif decision == "maybe":
-            priority = "C"
-        elif decision == "yes":
-            priority = "B"
-        elif decision == "strong_yes":
-            priority = model_priority  # gate 已验证过 A，保持
-        else:
-            priority = model_priority
-
-        action_timing = candidate.get("action_timing")
-        if action_timing not in VALID_TIMINGS:
-            action_timing = "optional"
+        decision = raw_model_decision if raw_model_decision in VALID_DECISIONS else "maybe"
+        priority = raw_model_priority if raw_model_priority in VALID_PRIORITIES else _default_priority_for_decision(decision)
+        action_timing = (
+            raw_model_action_timing
+            if raw_model_action_timing in VALID_TIMINGS
+            else _default_timing_for_decision(decision)
+        )
 
         candidate_name = _extract_candidate_name(candidate, source_candidate)
         role_label = _extract_role_label(candidate, source_candidate)
@@ -1924,28 +2036,35 @@ def sanitize_output(data: Dict[str, Any], input_data: Optional[Dict[str, Any]] =
             "reasons": reasons,
             "risks": risks,
             "score_breakdown": score_breakdown,
-            "match_fit": str(candidate.get("match_fit") or "").strip().lower(),
-            "recruitability": str(candidate.get("recruitability") or "").strip().lower(),
-            "mismatch_type": str(candidate.get("mismatch_type") or "").strip().lower(),
-            "willingness": str(candidate.get("willingness") or "").strip().lower(),
+            "match_fit": raw_model_match_fit if raw_model_match_fit in VALID_MATCH_FITS else "",
+            "recruitability": raw_model_recruitability if raw_model_recruitability in VALID_RECRUITABILITIES else "",
+            "mismatch_type": raw_model_mismatch_type if raw_model_mismatch_type in VALID_MISMATCH_TYPES else "",
+            "willingness": raw_model_willingness if raw_model_willingness in {"high", "medium", "low", "unknown"} else "",
             "match_fit_reason": _clean_text(candidate.get("match_fit_reason")),
-            "match_fit_breakdown": candidate.get("match_fit_breakdown", {}),
+            "match_fit_breakdown": _normalize_optional_breakdown(candidate.get("match_fit_breakdown", {})),
             "recruitability_reason": _clean_text(candidate.get("recruitability_reason")),
-            "recruitability_breakdown": candidate.get("recruitability_breakdown", {}),
+            "recruitability_breakdown": _normalize_optional_breakdown(candidate.get("recruitability_breakdown", {})),
             "hard_constraints": candidate.get("hard_constraints", {}),
             "decision_trace": candidate.get("decision_trace", {}),
             "override_trace": list(candidate.get("override_trace") or []),
+            "model_decision": raw_model_decision,
+            "model_priority": raw_model_priority,
+            "model_action_timing": raw_model_action_timing,
+            "model_match_fit": raw_model_match_fit,
+            "model_match_fit_reason": _clean_text(candidate.get("match_fit_reason")),
+            "model_recruitability": raw_model_recruitability,
+            "model_recruitability_reason": _clean_text(candidate.get("recruitability_reason")),
+            "model_willingness": raw_model_willingness,
+            "model_mismatch_type": raw_model_mismatch_type,
         }
 
-        normalized_candidate["mismatch_type"] = _judge_mismatch_type(normalized_candidate, source_candidate or {}, input_data or {})
-        normalized_candidate.update(_compute_match_fit(normalized_candidate, source_candidate or {}, input_data or {}))
-        normalized_candidate.update(_compute_recruitability(normalized_candidate, source_candidate or {}, input_data or {}))
-        normalized_candidate["willingness"] = _derive_willingness(normalized_candidate)
-        normalized_candidate = _sanitize_match_fit_recruitability(normalized_candidate)
-        normalized_candidate = _apply_hard_constraints(normalized_candidate, input_data or {})
-        normalized_candidate = _apply_decision_matrix(normalized_candidate)
-        normalized_candidate = _maybe_override_final_decision(normalized_candidate, candidate)
-        normalized_candidate = _apply_hard_mismatch_guard(normalized_candidate)
+        normalized_candidate["runner_review"] = _build_runner_review(
+            normalized_candidate,
+            source_candidate or {},
+            input_data or {},
+        )
+        normalized_candidate["hard_constraints"] = normalized_candidate["runner_review"].get("hard_constraints", {})
+        normalized_candidate = _maybe_override_final_decision(normalized_candidate)
 
         # --- core_judgement 语气一致性清理（任何场景都执行，在 guard 之后） ---
         cj = normalized_candidate.get("core_judgement") or ""

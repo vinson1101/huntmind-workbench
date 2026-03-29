@@ -149,6 +149,8 @@ def process_local_folder(
         }
 
     output_text = decision_handler(batch_input)
+    huntmind_output_path = run_dir / "huntmind_output.json"
+    huntmind_output_path.write_text(output_text, encoding="utf-8")
     runner_result = run_output_processing(batch_input, output_text)
 
     final_output_path = run_dir / "final_output.json"
@@ -186,6 +188,7 @@ def process_local_folder(
             "failure_count": len(ingest_result["failures"]),
             "candidate_paths": candidate_paths,
             "final_output_path": str(final_output_path),
+            "huntmind_output_path": str(huntmind_output_path),
             "final_report_path": str(final_report_path),
             "quality_meta_path": str(quality_meta_path),
             "owner_summary_path": str(owner_summary_path),
@@ -206,6 +209,7 @@ def process_local_folder(
         "candidate_paths": candidate_paths,
         "runner_result": runner_result,
         "final_output_path": str(final_output_path),
+        "huntmind_output_path": str(huntmind_output_path),
         "final_report_path": str(final_report_path),
         "quality_meta_path": str(quality_meta_path),
         "owner_summary_path": str(owner_summary_path),
@@ -281,6 +285,7 @@ if __name__ == "__main__":
                 "run_meta_path": result["run_meta_path"],
                 "candidate_paths": result["candidate_paths"],
                 "final_output_path": result["final_output_path"],
+                "huntmind_output_path": result["huntmind_output_path"],
                 "final_report_path": result["final_report_path"],
                 "quality_meta_path": result["quality_meta_path"],
                 "owner_summary_path": result["owner_summary_path"],

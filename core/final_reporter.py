@@ -220,6 +220,31 @@ class FinalReporter:
         if _clean_text(candidate.get("recruitability_reason")):
             lines.append(f"- **Recruitability Reason**: {_clean_text(candidate.get('recruitability_reason'))}")
 
+        model_decision = _clean_text(candidate.get("model_decision"))
+        if model_decision:
+            lines.append(f"- **Model Decision**: {model_decision}")
+
+        model_match_fit = _clean_text(candidate.get("model_match_fit"))
+        if model_match_fit:
+            lines.append(f"- **Model Match Fit**: {model_match_fit}")
+
+        model_recruitability = _clean_text(candidate.get("model_recruitability"))
+        if model_recruitability:
+            lines.append(f"- **Model Recruitability**: {model_recruitability}")
+
+        runner_review = candidate.get("runner_review", {})
+        if isinstance(runner_review, dict) and runner_review:
+            lines.extend(["", "**Runner Review**:"])
+            for key in (
+                "match_fit",
+                "recruitability",
+                "mismatch_type",
+                "decision_suggestion",
+            ):
+                value = _clean_text(runner_review.get(key))
+                if value:
+                    lines.append(f"- {key}: {value}")
+
         recruitability_breakdown = candidate.get("recruitability_breakdown", {})
         if isinstance(recruitability_breakdown, dict) and recruitability_breakdown:
             lines.extend(["", "**Recruitability Breakdown**:"])
@@ -253,15 +278,23 @@ class FinalReporter:
             lines.extend(["", "**Decision Trace**:"])
             for key in (
                 "model_raw_decision",
-                "computed_match_fit",
-                "computed_recruitability",
-                "mismatch_type",
+                "model_match_fit",
+                "model_recruitability",
+                "model_mismatch_type",
+                "runner_review_match_fit",
+                "runner_review_recruitability",
+                "runner_review_mismatch_type",
                 "final_decision",
+                "override_applied",
                 "override_reason",
             ):
-                value = _clean_text(decision_trace.get(key))
-                if value:
+                value = decision_trace.get(key)
+                if isinstance(value, bool):
                     lines.append(f"- {key}: {value}")
+                    continue
+                text = _clean_text(value)
+                if text:
+                    lines.append(f"- {key}: {text}")
 
         lines.extend(["", "**核心判断**:", f"- {self._summary_judgement(candidate)}"])
 
