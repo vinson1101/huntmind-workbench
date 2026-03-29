@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -24,11 +23,15 @@ SUITE_EXPECTED_TEMPLATES = {
 
 
 def load_json(path: Path) -> Any:
+    import json
+
     with open(path, "r", encoding="utf-8") as handle:
         return json.load(handle)
 
 
 def write_json(path: Path, data: Any) -> None:
+    import json
+
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(data, handle, ensure_ascii=False, indent=2)
@@ -233,6 +236,21 @@ def discover_suite(name: str) -> Dict[str, Any]:
     }
 
 
+def _resolve_final_output_path(run_dir: Path, batch_id: str) -> Path:
+    direct_path = run_dir / "final_output.json"
+    nested_path = run_dir / batch_id / "final_output.json"
+
+    if direct_path.exists():
+        return direct_path
+    if nested_path.exists():
+        return nested_path
+
+    raise FileNotFoundError(
+        "final_output.json not found. Checked: "
+        f"{direct_path} and {nested_path}"
+    )
+
+
 def load_batch_payload(
     suite: Dict[str, Any],
     run_dir: Path,
@@ -242,11 +260,7 @@ def load_batch_payload(
     expected_summary_path = suite.get("expected_summary_path")
     expected_summary = load_json(expected_summary_path) if expected_summary_path else {}
 
-    final_output_path = run_dir / suite["batch_id"] / "final_output.json"
-    if not final_output_path.exists():
-        raise FileNotFoundError(
-            f"final_output.json not found for batch {suite['batch_id']} under run dir {run_dir}"
-        )
+    final_output_path = _resolve_final_output_path(run_dir, suite["batch_id"])
     final_output = load_json(final_output_path)
 
     source_paths = {

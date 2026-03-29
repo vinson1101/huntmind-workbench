@@ -14,7 +14,7 @@ Judge 不再负责：
 ## 目录职责
 
 - `evals/calibration_set/`：固定测试输入与人工真值
-- `runs/<run_id>/<batch_id>/final_output.json`：某次真实运行结果
+- `runs/`：某次真实运行结果
 - `evals/judge/`：比较脚本
 - `evals/results/<run_id>/`：Judge 产出的 compare / summary / report
 
@@ -33,7 +33,13 @@ evals/calibration_set/<batch_id>/
 python -m evals.judge.run_judge --config evals/judge/config.json --run-dir runs/<run_id>
 ```
 
-`run-dir` 下默认按下面结构寻找结果：
+`run-dir` 下优先按当前真实主链路寻找：
+
+```text
+runs/<run_id>/final_output.json
+```
+
+如果以后运行结果改成按 batch 落盘，Judge 也兼容：
 
 ```text
 runs/<run_id>/<batch_id>/final_output.json
@@ -69,7 +75,7 @@ evals/results/<tag>/
 
 Judge 比较的是：
 
-- `runs/<run_id>/<batch_id>/final_output.json`
+- 某次真实运行产出的 `final_output.json`
 - `evals/calibration_set/<batch_id>/human_labels.json`
 
 它不比较过程，也不要求某次历史 `huntmind_output.json` 成为评估资产。
