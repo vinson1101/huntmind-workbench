@@ -1,53 +1,125 @@
 {
-  "overall_diagnosis": "judge fixture",
-  "batch_advice": "judge fixture",
+  "batch_id": "frontend_dev_batch_001",
+  "overall_diagnosis": "4人中3人hard_mismatch（康冉无前端证据、胡梦婕产品经理、俞纬Java后端），1人maybe（覃屈容有Vue/小程序学习经历但无正式工作经验）。有效候选人严重不足。",
   "top_recommendations": [
     {
-      "candidate_id": "frontend_001",
+      "candidate_id": "local_覃屈容_1年_fc0f914da093",
+      "name": "覃屈容",
+      "source_file": "覃屈容_1年.pdf",
       "rank": 1,
-      "total_score": 85,
-      "decision": "yes",
-      "priority": "A",
-      "action_timing": "today",
-      "core_judgement": "judge candidate",
+      "decision": "no",
+      "match_fit": "low",
+      "recruitability": "low",
+      "mismatch_type": "none",
+      "willingness": "unknown",
+      "total_score": 38.0,
+      "action_timing": "watch",
+      "core_judgement": "cs_background_vue_student_projects_no_work_experience",
       "reasons": [
-        "reason 1",
-        "reason 2",
-        "reason 3"
+        "有Vue框架学习经历和仿淘宝App项目（Vue全局组件、HTML5/CSS3/JavaScript），符合JD技术栈",
+        "有微信小程序基础开发经验（掌握基本微信小程序开发技能），属于JD加分项",
+        "2021年计算机本科毕业，主修包含数据结构、算法等计算机基础"
       ],
       "risks": [
-        "risk 1"
+        "无任何正式前端工作经验，仅有课程项目和自我学习",
+        "2021年毕业至今4年，简历中无任何工作经历描述，时间线空白无法解释",
+        "仅有学生项目经验，缺少企业级前端工程化实践"
       ],
-      "score_breakdown": {
-        "hard_skill": 80,
-        "experience": 80,
-        "stability": 80,
-        "potential": 80,
-        "conversion": 80
-      },
-      "structured_score": {
-        "template_id": "rd_engineer",
-        "dimension_scores": {
-          "hard_skill_match": 80,
-          "experience_depth": 80,
-          "innovation_potential": 75,
-          "execution_goal_breakdown": 80,
-          "team_fit": 75,
-          "willingness": 95,
-          "stability": 70
-        },
-        "weight_snapshot": {},
-        "dimension_evidence": {}
-      },
+      "priority": "C",
       "action": {
-        "should_contact": true,
-        "hook_message": "hook",
-        "verification_question": "question",
-        "message_template": "template",
+        "message_template": "您好覃同学，我们正在招聘前端开发工程师，看到您有Vue和小程序的学习项目经验，想了解一下您目前的求职状态和前端学习情况。",
         "deep_questions": [
-          "q1",
-          "q2",
-          "q3"
+          "您2021年毕业到现在这段时间主要在做什么？有正式的前端工作经验吗？",
+          "您的微信小程序项目具体是怎么实现的？用了什么框架和工具？",
+          "您目前是在学习还是找工作？对宁波的前端岗位有兴趣吗？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_康冉_康冉_e1947c14c973",
+      "name": "康冉",
+      "source_file": "康冉_一年以内.pdf",
+      "rank": 2,
+      "decision": "no",
+      "match_fit": "low",
+      "recruitability": "low",
+      "mismatch_type": "hard_mismatch",
+      "willingness": "unknown",
+      "total_score": 32.0,
+      "action_timing": "watch",
+      "core_judgement": "no_front_end_evidence",
+      "reasons": [
+        "简历内容极度贫乏（约567字符），无任何前端框架、项目或技术栈展示",
+        "主修数据科学和大数据技术（Hadoop、机器学习、数据挖掘），不是前端方向",
+        "唯一工作经验是青芒教育数学教师，与前端开发无关"
+      ],
+      "risks": [
+        "hard_mismatch: 信息严重不足，无法支撑任何前端能力判断",
+        "hard_mismatch: 专业背景和唯一工作经历均与前端无关"
+      ],
+      "priority": "N",
+      "action": {
+        "message_template": "您好康冉，看到您的简历背景是数据科学，我们招聘的是前端开发工程师，想了解一下您目前有前端方面的学习或实践经历吗？",
+        "deep_questions": [
+          "您的简历内容比较简略，有前端方面的项目或学习经历吗？",
+          "您是主动往前端方向发展吗？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_俞纬_JAVA中级_78fba26ad6fd",
+      "name": "俞纬",
+      "source_file": "俞纬_JAVA中级.pdf",
+      "rank": 3,
+      "decision": "no",
+      "match_fit": "low",
+      "recruitability": "low",
+      "mismatch_type": "hard_mismatch",
+      "willingness": "unknown",
+      "total_score": 28.0,
+      "action_timing": "watch",
+      "core_judgement": "java_backend_not_frontend",
+      "reasons": [
+        "简历标题明确写Java开发工程师，全是SpringBoot/mybatis/SpringSecurity后端栈",
+        "Vue和element-ui仅在项目中附带提及，不是主要技能方向"
+      ],
+      "risks": [
+        "hard_mismatch: Java后端不等于前端开发"
+      ],
+      "priority": "N",
+      "action": {
+        "message_template": "您好俞纬，看到您的简历背景是Java开发工程师，我们招聘的是前端开发工程师，请问您是在关注前端方向的转型机会吗？",
+        "deep_questions": [
+          "您简历定位是Java后端，主要用Vue做的是什么？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_胡梦婕_2年_85d9e01d741d",
+      "name": "胡梦婕",
+      "source_file": "胡梦婕_2年.pdf",
+      "rank": 4,
+      "decision": "no",
+      "match_fit": "low",
+      "recruitability": "low",
+      "mismatch_type": "hard_mismatch",
+      "willingness": "unknown",
+      "total_score": 22.0,
+      "action_timing": "watch",
+      "core_judgement": "product_manager_not_front_end",
+      "reasons": [
+        "求职意向明确是产品经理和需求分析师，不是前端开发工程师",
+        "工作经历全是产品经理：浙江蕙康科技产品经理、中塑股份产品经理",
+        "技能全是Axure、墨刀、xmind、visio、PS、Coredraw——没有一项前端编程语言或框架"
+      ],
+      "risks": [
+        "hard_mismatch: 产品经理背景，无任何前端开发证据"
+      ],
+      "priority": "N",
+      "action": {
+        "message_template": "您好胡经理，我们看到您的简历背景主要是产品经理，我们目前招聘的是前端开发工程师，请问您是有在关注前端方向的转型机会吗？",
+        "deep_questions": [
+          "您目前从事产品经理工作，是什么让您考虑往前端开发方向转型？"
         ]
       }
     }

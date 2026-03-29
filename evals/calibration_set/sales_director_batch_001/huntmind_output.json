@@ -1,54 +1,126 @@
 {
-  "overall_diagnosis": "judge fixture",
-  "batch_advice": "judge fixture",
+  "batch_id": "sales_director_batch_001",
+  "overall_diagnosis": "4人中郭萌（EV汽车美国经验）、顾胜兴（Director级，北美经验）值得联系，Charles Ma简历好但实际不应联系，Jing Peng不合适。",
   "top_recommendations": [
     {
-      "candidate_id": "sales_001",
+      "candidate_id": "local_郭萌_汽车销售总监_a9b6945a5309",
+      "name": "郭萌",
+      "source_file": "郭萌_汽车销售总监.pdf",
       "rank": 1,
-      "total_score": 85,
       "decision": "yes",
-      "priority": "A",
-      "action_timing": "today",
-      "core_judgement": "judge candidate",
+      "match_fit": "high",
+      "recruitability": "high",
+      "mismatch_type": "none",
+      "willingness": "high",
+      "total_score": 72.0,
+      "action_timing": "now",
+      "core_judgement": "EV汽车美国AEW经验10年汽车配件",
       "reasons": [
-        "reason 1",
-        "reason 2",
-        "reason 3"
+        "天津人，现任AAG美国加州AEW汽车配件公司汽车销售总监，10年汽车配件销售管理经验",
+        "天津AM General/Lance Sintered Metals工作经验，覆盖汽车制动/底盘/发动机零配件，北美EV供应链经验",
+        "英语可工作，base密歇根，临近底特律汽车OEM核心区，北美汽车EV行业渠道资源丰富"
       ],
       "risks": [
-        "risk 1"
+        "runner曾误判location=low，但候选人实际在美国汽车行业工作"
       ],
-      "score_breakdown": {
-        "hard_skill": 80,
-        "experience": 80,
-        "stability": 80,
-        "potential": 80,
-        "conversion": 80
-      },
-      "structured_score": {
-        "template_id": "sales_director",
-        "dimension_scores": {
-          "hard_skill_match": 80,
-          "experience_depth": 80,
-          "innovation_potential": 75,
-          "execution_goal_breakdown": 80,
-          "team_fit": 75,
-          "willingness": 95,
-          "stability": 70
-        },
-        "weight_snapshot": {},
-        "dimension_evidence": {}
-      },
+      "priority": "A",
       "action": {
-        "should_contact": true,
-        "hook_message": "hook",
-        "verification_question": "question",
-        "message_template": "template",
+        "message_template": "您好郭总，看到您在美国AEW汽车配件公司负责销售管理，10年汽车配件经验覆盖制动/底盘/发动机零配件，我们在招聘汽车销售总监，想了解一下您目前是否在看新的机会。",
         "deep_questions": [
-          "q1",
-          "q2",
-          "q3"
+          "您目前在美国AAG负责汽车配件销售，具体是哪些产品线和客户群体？",
+          "您对EV汽车配件方向有兴趣吗？我们客户端主要是汽车OEM和Tier 1供应商",
+          "您目前是在看国内还是海外的机会？薪资预期大概是什么范围？"
         ]
+      }
+    },
+    {
+      "candidate_id": "local_顾胜兴_Director_of_Automotive_Sales_Try_Consulting_37b2cd45e0d6",
+      "name": "顾胜兴",
+      "source_file": "顾胜兴_Director_of_Automotive_Sales_Try Consulting.pdf",
+      "rank": 2,
+      "decision": "maybe",
+      "match_fit": "medium",
+      "recruitability": "medium",
+      "mismatch_type": "none",
+      "willingness": "medium",
+      "total_score": 62.0,
+      "action_timing": "this_week",
+      "core_judgement": "比亚迪美国经验Director级背景",
+      "reasons": [
+        "简历显示曾在比亚迪美国（Lancaster工厂）和上海参与EV汽车业务，有北美汽车OEM直接接触经验",
+        "天津人，本科毕业于University of Science and Technology Beijing，有海外经历",
+        "简历描述复杂，但有北美汽车行业背景，与JD方向相关"
+      ],
+      "risks": [
+        "简历来源是Try Consulting（猎头），描述可能经过包装，需要核验实际工作内容和成绩",
+        "目前可能不在国内，需要确认是否愿意回来工作",
+        "JD要求Director级，候选人履历是否真正达到Director层级需要核验"
+      ],
+      "priority": "B",
+      "action": {
+        "message_template": "您好顾总，看到您有比亚迪美国和上海EV业务经验，我们招聘汽车销售总监，想了解一下您目前的求职状态。",
+        "deep_questions": [
+          "您之前在比亚迪美国主要负责什么业务？直接对接的OEM客户是哪些？",
+          "您目前是在看国内的机会吗？对工作地点有什么要求？",
+          "您之前带团队的经验大概是多大的规模？向谁汇报？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_Charles_Ma_汽车销售总监_ff549df02096",
+      "name": "Charles Ma",
+      "source_file": "Charles Ma_汽车销售总监.pdf",
+      "rank": 3,
+      "decision": "no",
+      "match_fit": "low",
+      "recruitability": "low",
+      "mismatch_type": "none",
+      "willingness": "low",
+      "total_score": 45.0,
+      "action_timing": "watch",
+      "core_judgement": "豪华汽车4S店模式不等于EV配件直销",
+      "reasons": [
+        "23年+豪华汽车品牌（Stellantis/$23.2M）销售管理经验，猎头expert给了strong_yes"
+      ],
+      "risks": [
+        "hard_mismatch: 豪华汽车4S店销售模式≠EV汽车配件直销/关键客户销售模式",
+        "客户群体不同：豪华汽车 private buyer/dealer network≠EV OEM/Tier 1 关键客户直销",
+        "猎头expert给了strong_yes但实际不应联系（可能已入职其他客户或无法联系）",
+        "英语/粤语沟通能力未在简历中体现"
+      ],
+      "priority": "N",
+      "action": {
+        "message_template": "您好Charles，看到您在Stellantis有丰富的豪华汽车销售管理经验，我们招聘汽车销售总监，想了解一下您目前是否在看新的机会。",
+        "deep_questions": [
+          "您之前在Stellantis负责的销售范围是哪些品牌？直接客户是private buyer还是dealer network？",
+          "您对EV汽车配件的OEM/关键客户销售模式有了解或兴趣吗？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_Jing_Jing Peng_简历_2025_22a1f357c972",
+      "name": "Jing Peng",
+      "source_file": "Jing Peng_简历_2025.pdf",
+      "rank": 4,
+      "decision": "no",
+      "match_fit": "low",
+      "recruitability": "low",
+      "mismatch_type": "hard_mismatch",
+      "willingness": "unknown",
+      "total_score": 28.0,
+      "action_timing": "watch",
+      "core_judgement": "无汽车行业经验",
+      "reasons": [
+        "无任何汽车行业经验，无EV/汽车配件相关背景",
+        "猎头expert给了no判断"
+      ],
+      "risks": [
+        "hard_mismatch: 简历内容与汽车销售总监岗位完全无关"
+      ],
+      "priority": "N",
+      "action": {
+        "message_template": "您好Jing Peng，看到您的背景是运营管理，我们招聘的是汽车销售总监岗位，可能不太匹配。",
+        "deep_questions": []
       }
     }
   ]

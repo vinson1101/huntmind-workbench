@@ -1,54 +1,157 @@
 {
-  "overall_diagnosis": "judge fixture",
-  "batch_advice": "judge fixture",
+  "batch_id": "blockchain_lead_batch_001",
+  "overall_diagnosis": "5人中范尧迦/梅一鸣为核心候选人（均有offer），齐伟/王秀斌可备选，李成才hard_mismatch。",
   "top_recommendations": [
     {
-      "candidate_id": "blockchain_001",
+      "candidate_id": "local_范尧迦_区块链业务负责人_9d5c416268cf",
+      "name": "范尧迦",
+      "source_file": "范尧迦_区块链业务负责人.pdf",
       "rank": 1,
-      "total_score": 85,
-      "decision": "strong_yes",
-      "priority": "A",
-      "action_timing": "today",
-      "core_judgement": "judge candidate",
+      "decision": "yes",
+      "match_fit": "high",
+      "recruitability": "high",
+      "mismatch_type": "none",
+      "willingness": "medium",
+      "total_score": 68.0,
+      "action_timing": "now",
+      "core_judgement": "18年区块链NFT创业经验IEEE标准制定者",
       "reasons": [
-        "reason 1",
-        "reason 2",
-        "reason 3"
+        "18年区块链行业经验，NFT/Web3赛道深度积累，2021-2023主导多个头部品牌数字藏品商业化项目",
+        "2年区块链创业公司CEO经验，熟悉创业公司节奏和商业模式设计",
+        "IEEE P3221数字藏品国际标准专家，全程参与标准制定"
       ],
       "risks": [
-        "risk 1"
+        "薪资预期可能超过创业公司承受范围，需要核验"
       ],
-      "score_breakdown": {
-        "hard_skill": 80,
-        "experience": 80,
-        "stability": 80,
-        "potential": 80,
-        "conversion": 80
-      },
-      "structured_score": {
-        "template_id": "sales_director",
-        "dimension_scores": {
-          "hard_skill_match": 80,
-          "experience_depth": 80,
-          "innovation_potential": 75,
-          "execution_goal_breakdown": 80,
-          "team_fit": 75,
-          "willingness": 95,
-          "stability": 70
-        },
-        "weight_snapshot": {},
-        "dimension_evidence": {}
-      },
+      "priority": "A",
       "action": {
-        "should_contact": true,
-        "hook_message": "hook",
-        "verification_question": "question",
-        "message_template": "template",
+        "message_template": "您好范总，看到您有18年区块链行业经验和NFT创业经历，我们在招聘区块链业务负责人，想和您聊聊这个机会。",
         "deep_questions": [
-          "q1",
-          "q2",
-          "q3"
+          "您目前是在看什么类型的机会？对创业公司环境接受吗？",
+          "您NFT/Web3赛道的具体商业化落地经验是怎样的？",
+          "您的薪资预期大概是什么范围？"
         ]
+      }
+    },
+    {
+      "candidate_id": "local_梅一鸣_产品总监_46fd640e0451",
+      "name": "梅一鸣",
+      "source_file": "梅一鸣_产品总监.pdf",
+      "rank": 2,
+      "decision": "yes",
+      "match_fit": "high",
+      "recruitability": "high",
+      "mismatch_type": "none",
+      "willingness": "medium",
+      "total_score": 65.0,
+      "action_timing": "now",
+      "core_judgement": "15年产品经验5年区块链事业部总经理",
+      "reasons": [
+        "15年产品经验，5年区块链行业经验，曾在国金商业机构主导区块链电商业务",
+        "有事业部总经理管理经验，具备业务条线负责人能力",
+        "区块链行业应用经验丰富"
+      ],
+      "risks": [
+        "商务拓展/机构客户资源有差距，需要核验",
+        "薪资可能超出创业公司范围"
+      ],
+      "priority": "A",
+      "action": {
+        "message_template": "您好梅总，看到您有15年产品经验和5年区块链行业经验，我们在招聘区块链业务负责人，想了解一下您目前是否在看新机会。",
+        "deep_questions": [
+          "您目前是在看什么类型的机会？对创业公司环境接受吗？",
+          "您有具体的区块链商业化落地经验吗？能举个具体例子吗？",
+          "您的薪资预期大概是什么范围？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_齐齐伟伟_区块链技术专家_6710b04a917b",
+      "name": "齐齐伟伟",
+      "source_file": "齐齐伟伟_区块链技术专家.pdf",
+      "rank": 3,
+      "decision": "maybe",
+      "match_fit": "medium",
+      "recruitability": "medium",
+      "mismatch_type": "recoverable",
+      "willingness": "medium",
+      "total_score": 52.0,
+      "action_timing": "this_week",
+      "core_judgement": "6年区块链开发经验技术栈完整",
+      "reasons": [
+        "6年区块链开发经验，以太坊/Goerli/Chainlink技术栈完整",
+        "有区块链核心技术开发经验，智能合约开发能力",
+        "相关从业经历覆盖多个区块链应用场景"
+      ],
+      "risks": [
+        "偏技术背景，商务拓展能力需要核验",
+        "薪资可能超出创业公司范围"
+      ],
+      "priority": "B",
+      "action": {
+        "message_template": "您好齐齐，看到您有6年区块链开发经验，我们在招聘区块链业务负责人，想了解一下您目前是否在看新机会。",
+        "deep_questions": [
+          "您有商务拓展或机构客户对接的经验吗？",
+          "您对创业公司的工作模式接受吗？",
+          "您的薪资预期大概是什么范围？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_王秀斌_区块链技术专家_56cfd1cf47e9",
+      "name": "王秀斌",
+      "source_file": "王秀斌_区块链技术专家.pdf",
+      "rank": 4,
+      "decision": "maybe",
+      "match_fit": "medium",
+      "recruitability": "medium",
+      "mismatch_type": "recoverable",
+      "willingness": "medium",
+      "total_score": 48.0,
+      "action_timing": "this_week",
+      "core_judgement": "3年区块链经验有联盟链开发背景",
+      "reasons": [
+        "3年+区块链行业经验，联盟链/公链开发经验",
+        "有区块链核心开发能力，技术栈有一定覆盖",
+        "工作经历与区块链行业相关"
+      ],
+      "risks": [
+        "技术深度有限，DeFi/NFT核心能力待核验",
+        "可能不是最优选择"
+      ],
+      "priority": "B",
+      "action": {
+        "message_template": "您好王先生，看到您有区块链开发经验，我们在招聘区块链业务负责人，想了解一下您目前是否在看新机会。",
+        "deep_questions": [
+          "您有具体的区块链商业项目经验吗？能举个具体例子吗？",
+          "您对创业公司的工作模式接受吗？",
+          "您的薪资预期大概是什么范围？"
+        ]
+      }
+    },
+    {
+      "candidate_id": "local_李成才_区块链技术专家_97d4d7e8336d",
+      "name": "李成才",
+      "source_file": "李成才_区块链技术专家.pdf",
+      "rank": 5,
+      "decision": "no",
+      "match_fit": "low",
+      "recruitability": "low",
+      "mismatch_type": "hard_mismatch",
+      "willingness": "unknown",
+      "total_score": 32.0,
+      "action_timing": "watch",
+      "core_judgement": "Java后端不等于区块链业务负责人",
+      "reasons": [
+        "5年Java开发经验"
+      ],
+      "risks": [
+        "hard_mismatch: 纯Java后端开发经验，不等于区块链业务负责人能力"
+      ],
+      "priority": "N",
+      "action": {
+        "message_template": "您好李先生，看到您的背景是Java开发，我们招聘的是区块链业务负责人，可能不太匹配。",
+        "deep_questions": []
       }
     }
   ]
