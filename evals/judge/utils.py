@@ -317,6 +317,34 @@ def discover_suite(name: str) -> Dict[str, Any]:
         }
 
     if name == "blockchain_lead":
+        calibration_batch_dir = calibration_root / "blockchain_lead_batch_001"
+        batch_input_path = calibration_batch_dir / "batch_input.json"
+        model_output_path = calibration_batch_dir / "huntmind_output.json"
+        human_labels_path = calibration_batch_dir / "human_labels.json"
+        expected_summary_path = calibration_batch_dir / "expected_summary.json"
+        if (
+            batch_input_path.exists()
+            and model_output_path.exists()
+            and human_labels_path.exists()
+            and expected_summary_path.exists()
+        ):
+            return {
+                "suite_name": "blockchain_lead",
+                "batch_id": "blockchain_lead_batch_001",
+                "mode": "cached",
+                "expected_template": "sales_director",
+                "batch_input_path": batch_input_path,
+                "model_output_path": model_output_path,
+                "human_labels_path": human_labels_path,
+                "expected_summary_path": expected_summary_path,
+                "source_paths": {
+                    "batch_input": str(batch_input_path),
+                    "model_output": str(model_output_path),
+                    "human_labels": str(human_labels_path),
+                    "expected_summary": str(expected_summary_path),
+                },
+            }
+
         batch_input = {
             "jd": {
                 "title": "区块链业务负责人",
@@ -361,10 +389,44 @@ def discover_suite(name: str) -> Dict[str, Any]:
                 "expected_top_contact_ids": ["blockchain_001"],
                 "expected_no_contact_ids": [],
                 "risk_focus": ["区块链业务负责人不应再误路由到 product_manager"]
-            }
+            },
+            "source_paths": {
+                "batch_input": "fixture:inline",
+                "model_output": "fixture:inline",
+                "human_labels": "fixture:inline",
+                "expected_summary": "fixture:inline",
+            },
         }
 
     if name == "sales_director":
+        calibration_batch_dir = calibration_root / "sales_director_batch_001"
+        batch_input_path = calibration_batch_dir / "batch_input.json"
+        model_output_path = calibration_batch_dir / "huntmind_output.json"
+        human_labels_path = calibration_batch_dir / "human_labels.json"
+        expected_summary_path = calibration_batch_dir / "expected_summary.json"
+        if (
+            batch_input_path.exists()
+            and model_output_path.exists()
+            and human_labels_path.exists()
+            and expected_summary_path.exists()
+        ):
+            return {
+                "suite_name": "sales_director",
+                "batch_id": "sales_director_batch_001",
+                "mode": "cached",
+                "expected_template": "sales_director",
+                "batch_input_path": batch_input_path,
+                "model_output_path": model_output_path,
+                "human_labels_path": human_labels_path,
+                "expected_summary_path": expected_summary_path,
+                "source_paths": {
+                    "batch_input": str(batch_input_path),
+                    "model_output": str(model_output_path),
+                    "human_labels": str(human_labels_path),
+                    "expected_summary": str(expected_summary_path),
+                },
+            }
+
         batch_input = {
             "jd": {
                 "title": "销售总监",
@@ -408,7 +470,13 @@ def discover_suite(name: str) -> Dict[str, Any]:
                 "expected_top_contact_ids": [],
                 "expected_no_contact_ids": ["sales_001"],
                 "risk_focus": ["low_fit + high_willingness 不得被抬成 yes"]
-            }
+            },
+            "source_paths": {
+                "batch_input": "fixture:inline",
+                "model_output": "fixture:inline",
+                "human_labels": "fixture:inline",
+                "expected_summary": "fixture:inline",
+            },
         }
 
     raise ValueError(f"Unsupported suite: {name}")
