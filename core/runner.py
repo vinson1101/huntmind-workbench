@@ -1376,9 +1376,11 @@ def _apply_hard_constraints(candidate: Dict[str, Any], input_data: Dict[str, Any
     if breakdown.get("location_feasibility", {}).get("level") == "low" and not jd.get("travel_or_relocation"):
         issues.append("location_mismatch")
         hard_issues.append("location_mismatch")
+    has_explicit_hard_eligibility = bool(jd.get("eligibility_constraints"))
     if breakdown.get("eligibility_constraint", {}).get("level") == "low":
         issues.append("eligibility_constraint")
-        hard_issues.append("eligibility_constraint")
+        if has_explicit_hard_eligibility:
+            hard_issues.append("eligibility_constraint")
 
     candidate["hard_constraints"] = {
         "triggered": bool(hard_issues),
