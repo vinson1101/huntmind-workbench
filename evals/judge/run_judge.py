@@ -45,6 +45,7 @@ def _build_summary_record(
     return {
         "suite_name": suite_name,
         "batch_id": batch_id,
+        "counts": comparison.get("counts", {}),
         "metrics": metrics,
         "hard_errors": comparison["hard_errors"],
         "top3": comparison["top3"],

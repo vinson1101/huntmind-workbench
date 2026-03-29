@@ -37,6 +37,7 @@ def compare_batch(
     expected_summary: Dict[str, Any],
     routing_error_count: int,
 ) -> Dict[str, Any]:
+    normalized_humans = [normalize_human_label(item) for item in human_labels]
     model_candidates = final_output.get("top_recommendations", [])
     model_lookup = {
         normalize_candidate_output(candidate)["candidate_id"]: candidate
@@ -54,8 +55,7 @@ def compare_batch(
     low_fit_high_willingness_promoted = 0
     new_high_priority_false_positive = 0
 
-    for raw_label in human_labels:
-        human = normalize_human_label(raw_label)
+    for human in normalized_humans:
         raw_model_candidate = model_lookup.get(human["candidate_id"], {})
         model = normalize_candidate_output(raw_model_candidate)
         model_reason = reason_bucket_from_output(raw_model_candidate)
@@ -110,24 +110,25 @@ def compare_batch(
             }
         )
 
-    total = len(human_labels) or 1
-    human_top_ids = [item["candidate_id"] for item in human_labels if item.get("priority") == "A"][:3]
-    if not human_top_ids:
-        human_top_ids = expected_summary.get("expected_top_contact_ids", [])[:3]
-
+    total = len(normalized_humans) or 1
+    human_contact_ranked = sorted(
+        [item for item in normalized_humans if item["should_contact"]],
+        key=lambda item: (_priority_rank(item["priority"]), item["candidate_id"]),
+    )
+    human_top_ids = [item["candidate_id"] for item in human_contact_ranked][:3]
     model_sorted = sorted(
         [normalize_candidate_output(item) for item in model_candidates],
         key=lambda item: (_priority_rank(item["priority"]), item["candidate_id"]),
     )
     model_top_ids = [item["candidate_id"] for item in model_sorted if item["should_contact"]][:3]
     top3_hit_count = len(set(human_top_ids) & set(model_top_ids))
-    top3_base = len(human_top_ids) if human_top_ids else 1
+    top3_base = len(human_top_ids)
 
     metrics = {
         "contact_accuracy": round(contact_matches / total, 4),
         "priority_accuracy": round(priority_matches / total, 4),
         "decision_accuracy": round(decision_matches / total, 4),
-        "top3_hit_rate": round(top3_hit_count / top3_base, 4),
+        "top3_hit_rate": round(top3_hit_count / top3_base, 4) if top3_base else 0.0,
         "false_positive_rate": round(false_positive / total, 4),
         "false_negative_rate": round(false_negative / total, 4),
         "reason_accuracy": round(reason_matches / total, 4),
@@ -143,6 +144,17 @@ def compare_batch(
 
     return {
         "candidate_results": candidate_results,
+        "counts": {
+            "total_candidates": len(human_labels),
+            "contact_matches": contact_matches,
+            "priority_matches": priority_matches,
+            "decision_matches": decision_matches,
+            "reason_matches": reason_matches,
+            "false_positive": false_positive,
+            "false_negative": false_negative,
+            "top3_hit_count": top3_hit_count,
+            "top3_base": top3_base,
+        },
         "metrics": metrics,
         "hard_errors": hard_errors,
         "top3": {

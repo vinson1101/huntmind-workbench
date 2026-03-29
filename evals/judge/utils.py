@@ -140,16 +140,15 @@ def aggregate_metric_rows(batch_summaries: List[Dict[str, Any]], weights: Dict[s
             "score": 0.0,
         }
 
-    count = len(batch_summaries)
-    totals = {
-        "contact_accuracy": 0.0,
-        "priority_accuracy": 0.0,
-        "decision_accuracy": 0.0,
-        "top3_hit_rate": 0.0,
-        "false_positive_rate": 0.0,
-        "false_negative_rate": 0.0,
-        "reason_accuracy": 0.0,
-    }
+    total_candidates = 0
+    contact_matches = 0
+    priority_matches = 0
+    decision_matches = 0
+    reason_matches = 0
+    false_positive = 0
+    false_negative = 0
+    top3_hit_count = 0
+    top3_base = 0
     routing_error_count = 0
     hard_errors = {
         "hard_mismatch_false_positive": 0,
@@ -159,15 +158,35 @@ def aggregate_metric_rows(batch_summaries: List[Dict[str, Any]], weights: Dict[s
     }
 
     for summary in batch_summaries:
+        counts = summary.get("counts", {})
+        total_candidates += int(counts.get("total_candidates", 0))
+        contact_matches += int(counts.get("contact_matches", 0))
+        priority_matches += int(counts.get("priority_matches", 0))
+        decision_matches += int(counts.get("decision_matches", 0))
+        reason_matches += int(counts.get("reason_matches", 0))
+        false_positive += int(counts.get("false_positive", 0))
+        false_negative += int(counts.get("false_negative", 0))
+        top3_hit_count += int(counts.get("top3_hit_count", 0))
+        top3_base += int(counts.get("top3_base", 0))
+
         metrics = summary.get("metrics", {})
-        for key in totals:
-            totals[key] += float(metrics.get(key, 0))
         routing_error_count += int(metrics.get("routing_error_count", 0))
         batch_hard = summary.get("hard_errors", {})
         for key in hard_errors:
             hard_errors[key] += int(batch_hard.get(key, 0))
 
-    aggregated = {key: round(value / count, 4) for key, value in totals.items()}
+    candidate_base = total_candidates or 1
+    top3_denominator = top3_base or 1
+
+    aggregated = {
+        "contact_accuracy": round(contact_matches / candidate_base, 4),
+        "priority_accuracy": round(priority_matches / candidate_base, 4),
+        "decision_accuracy": round(decision_matches / candidate_base, 4),
+        "top3_hit_rate": round(top3_hit_count / top3_denominator, 4),
+        "false_positive_rate": round(false_positive / candidate_base, 4),
+        "false_negative_rate": round(false_negative / candidate_base, 4),
+        "reason_accuracy": round(reason_matches / candidate_base, 4),
+    }
     aggregated["routing_error_count"] = routing_error_count
     aggregated["score"] = compute_score(aggregated, weights)
     aggregated["hard_errors"] = hard_errors
