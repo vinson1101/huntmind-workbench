@@ -16,6 +16,12 @@
 python -m evals.judge.run_judge --config evals/judge/config.json
 ```
 
+只跑单个 suite：
+
+```bash
+python -m evals.judge.run_judge --config evals/judge/config.json --suite frontend_dev
+```
+
 ## 默认支持的 4 类测试
 
 - `product`

@@ -24,6 +24,12 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run fixed HuntMind evaluation judge.")
     parser.add_argument("--config", required=True, help="Path to judge config JSON")
     parser.add_argument("--tag", default="", help="Optional results tag")
+    parser.add_argument(
+        "--suite",
+        nargs="+",
+        default=[],
+        help="Optional suite override, e.g. --suite frontend_dev",
+    )
     return parser.parse_args()
 
 
@@ -53,6 +59,7 @@ def main() -> None:
         config_path = PROJECT_ROOT / config_path
     config = load_json(config_path)
 
+    suite_names = args.suite or config["suite_names"]
     results_root = PROJECT_ROOT / config["results_root"]
     tag = args.tag or timestamp_tag()
     results_dir = results_root / tag
@@ -60,7 +67,7 @@ def main() -> None:
 
     batch_reports: List[Dict[str, Any]] = []
 
-    for suite_name in config["suite_names"]:
+    for suite_name in suite_names:
         suite = discover_suite(suite_name)
         batch_input, model_output_text, human_labels, expected_summary = load_batch_payload(suite)
         final_output = run_batch_through_runner(batch_input, model_output_text)
@@ -88,7 +95,10 @@ def main() -> None:
     aggregated = aggregate_metric_rows(batch_reports, config["score_weights"])
     report = {
         "tag": tag,
-        "config": config,
+        "config": {
+            **config,
+            "suite_names": suite_names,
+        },
         "batches": batch_reports,
         "global_metrics": {
             key: value for key, value in aggregated.items() if key != "hard_errors"
