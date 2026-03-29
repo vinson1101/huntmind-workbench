@@ -1,0 +1,14 @@
+{
+  "tenant_name": "example_tenant",
+  "preferences": {
+    "accept_remote_candidates": "unknown",
+    "accept_industry_switch": "medium",
+    "accept_pm_to_product_transition": "medium",
+    "prefer_large_company_background": "unknown",
+    "prefer_startup_background": "unknown",
+    "education_preference": "",
+    "years_of_experience_preference": "",
+    "location_flexibility": "",
+    "notes": []
+  }
+}

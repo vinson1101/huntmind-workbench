@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib
+import inspect
 import json
 import sys
 from pathlib import Path
@@ -29,6 +30,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from adapters.local_adapter import LocalAdapter
 from core.batch_builder import BatchBuilder
 from core.candidate_store import CandidateStore
+from core.context_loader import load_context_payload
 from core.final_reporter import FinalReporter
 from core.jd_parser import normalize_jd_data
 from core.resume_ingest import ingest_resume_files
@@ -36,7 +38,7 @@ from core.runner import run as run_output_processing
 
 
 DEFAULT_FILE_TYPES = ["pdf", "docx", "txt", "md"]
-BatchDecisionHandler = Callable[[Dict[str, Any]], str]
+BatchDecisionHandler = Callable[..., str]
 
 
 def process_local_folder(
@@ -116,6 +118,9 @@ def process_local_folder(
     batch_input = batch_builder.build_batch_input(ingest_result["candidates"])
     batch_input_path = batch_builder.save_batch_input(batch_input, run_dir)
     batch_builder.validate_saved_batch_input(batch_input_path)
+    context_payload = load_context_payload(project_root=PROJECT_ROOT)
+    context_payload_path = run_dir / "context_payload.json"
+    context_payload_path.write_text(json.dumps(context_payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     if decision_handler is None:
         run_metadata = batch_builder.build_run_metadata(
@@ -130,6 +135,7 @@ def process_local_folder(
                 "status": "prepared_only",
                 "decision_owner": bot_name,
                 "decision_handler": "not_provided",
+                "context_payload_path": str(context_payload_path),
             },
         )
         run_meta_path = batch_builder.save_run_metadata(run_metadata, run_dir)
@@ -139,6 +145,8 @@ def process_local_folder(
             "ingest_result": ingest_result,
             "batch_input": batch_input,
             "batch_input_path": str(batch_input_path),
+            "context_payload": context_payload,
+            "context_payload_path": str(context_payload_path),
             "run_meta_path": str(run_meta_path),
             "candidate_paths": candidate_paths,
             "runner_result": None,
@@ -148,7 +156,7 @@ def process_local_folder(
             "owner_summary_path": None,
         }
 
-    output_text = decision_handler(batch_input)
+    output_text = _call_decision_handler(decision_handler, batch_input, context_payload)
     huntmind_output_path = run_dir / "huntmind_output.json"
     huntmind_output_path.write_text(output_text, encoding="utf-8")
     runner_result = run_output_processing(batch_input, output_text)
@@ -189,6 +197,7 @@ def process_local_folder(
             "candidate_paths": candidate_paths,
             "final_output_path": str(final_output_path),
             "huntmind_output_path": str(huntmind_output_path),
+            "context_payload_path": str(context_payload_path),
             "final_report_path": str(final_report_path),
             "quality_meta_path": str(quality_meta_path),
             "owner_summary_path": str(owner_summary_path),
@@ -205,6 +214,8 @@ def process_local_folder(
         "ingest_result": ingest_result,
         "batch_input": batch_input,
         "batch_input_path": str(batch_input_path),
+        "context_payload": context_payload,
+        "context_payload_path": str(context_payload_path),
         "run_meta_path": str(run_meta_path),
         "candidate_paths": candidate_paths,
         "runner_result": runner_result,
@@ -232,6 +243,23 @@ def _local_file_to_resume_file(file_obj: Any) -> Dict[str, Any]:
         "channel": "local_folder",
         "mime_type": file_obj.file_type,
     }
+
+
+def _call_decision_handler(
+    decision_handler: BatchDecisionHandler,
+    batch_input: Dict[str, Any],
+    context_payload: Dict[str, Any],
+) -> str:
+    signature = inspect.signature(decision_handler)
+    parameters = signature.parameters
+
+    if "batch_input" in parameters and "context_payload" in parameters:
+        return decision_handler(batch_input=batch_input, context_payload=context_payload)
+    if "batch_input" in parameters:
+        return decision_handler(batch_input=batch_input)
+    if len(parameters) >= 2:
+        return decision_handler(batch_input, context_payload)
+    return decision_handler(batch_input)
 
 
 def load_decision_handler(spec: str) -> BatchDecisionHandler:

@@ -1,0 +1,18 @@
+{
+  "pack_role": "service_experience_pack.taxonomy_assets",
+  "description": "Structural assets for platform-controlled taxonomy experience.",
+  "assets": [
+    {
+      "id": "industry_position_tree",
+      "type": "json",
+      "path": "data/industry_position_tree.json",
+      "description": "Industry and position tree source."
+    },
+    {
+      "id": "sequence_lookup",
+      "type": "json",
+      "path": "data/sequence_lookup.json",
+      "description": "Industry/position to template mapping helpers."
+    }
+  ]
+}

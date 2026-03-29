@@ -1,0 +1,29 @@
+{
+  "pack_role": "service_experience_pack.core_rule_pack",
+  "description": "Platform-level rules, guardrails, and decision principles.",
+  "assets": [
+    {
+      "id": "decision_policy",
+      "type": "markdown",
+      "path": "references/decision-policy.md",
+      "description": "Platform decision policy and decision matrix."
+    },
+    {
+      "id": "output_contract",
+      "type": "markdown",
+      "path": "references/output-contract.md",
+      "description": "Platform output contract and field expectations."
+    },
+    {
+      "id": "scoring_policy",
+      "type": "markdown",
+      "path": "references/scoring-policy.md",
+      "description": "Platform scoring and evaluation guidance."
+    }
+  ],
+  "hard_guardrails": [
+    "hard_mismatch cannot be promoted to high-contact recommendation",
+    "hard_constraints can force conservative downgrade",
+    "runner may validate and guard, but should not replace HuntMind's semantic judgement"
+  ]
+}

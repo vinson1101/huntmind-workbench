@@ -12,9 +12,10 @@ class HuntMindDecisionHandler:
     def __init__(self, huntmind_runtime: Any):
         self.huntmind_runtime = huntmind_runtime
 
-    def __call__(self, batch_input: Dict[str, Any]) -> str:
+    def __call__(self, batch_input: Dict[str, Any], context_payload: Dict[str, Any] | None = None) -> str:
         result = self.huntmind_runtime.evaluate_recruiting_batch(
             batch_input=batch_input,
+            context_payload=context_payload or {},
             role="ai_hr",
             capability="recruiting_decision",
         )
@@ -41,7 +42,14 @@ def run_talentflow_from_huntmind(
 class FakeHuntMindRuntime:
     """Example contract only."""
 
-    def evaluate_recruiting_batch(self, *, batch_input: Dict[str, Any], role: str, capability: str) -> Dict[str, Any]:
+    def evaluate_recruiting_batch(
+        self,
+        *,
+        batch_input: Dict[str, Any],
+        context_payload: Dict[str, Any],
+        role: str,
+        capability: str,
+    ) -> Dict[str, Any]:
         raise NotImplementedError(
             "Implement evaluate_recruiting_batch in HuntMind and return JSON that TalentFlow runner can consume."
         )

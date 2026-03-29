@@ -1,0 +1,18 @@
+{
+  "pack_role": "service_experience_pack.template_assets",
+  "description": "Judgement assets for platform-controlled template experience.",
+  "assets": [
+    {
+      "id": "scoring_templates",
+      "type": "yaml",
+      "path": "configs/scoring_templates.yaml",
+      "description": "Fixed templates, routing helpers, and template rules."
+    },
+    {
+      "id": "decision_hints",
+      "type": "yaml",
+      "path": "configs/decision_hints.yaml",
+      "description": "Decision hints and routing assistance."
+    }
+  ]
+}
