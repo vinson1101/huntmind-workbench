@@ -242,6 +242,34 @@ def discover_suite(name: str) -> Dict[str, Any]:
         }
 
     if name == "frontend_dev":
+        calibration_batch_dir = calibration_root / "frontend_dev_batch_001"
+        batch_input_path = calibration_batch_dir / "batch_input.json"
+        model_output_path = calibration_batch_dir / "huntmind_output.json"
+        human_labels_path = calibration_batch_dir / "human_labels.json"
+        expected_summary_path = calibration_batch_dir / "expected_summary.json"
+        if (
+            batch_input_path.exists()
+            and model_output_path.exists()
+            and human_labels_path.exists()
+            and expected_summary_path.exists()
+        ):
+            return {
+                "suite_name": "frontend_dev",
+                "batch_id": "frontend_dev_batch_001",
+                "mode": "cached",
+                "expected_template": "rd_engineer",
+                "batch_input_path": batch_input_path,
+                "model_output_path": model_output_path,
+                "human_labels_path": human_labels_path,
+                "expected_summary_path": expected_summary_path,
+                "source_paths": {
+                    "batch_input": str(batch_input_path),
+                    "model_output": str(model_output_path),
+                    "human_labels": str(human_labels_path),
+                    "expected_summary": str(expected_summary_path),
+                },
+            }
+
         batch_input = {
             "jd": {
                 "title": "前端开发工程师",
