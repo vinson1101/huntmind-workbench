@@ -66,6 +66,17 @@ def main() -> None:
         raise FileNotFoundError(f"Run directory not found: {run_dir}")
 
     suite_names = args.suite or config["suite_names"]
+    suites = [discover_suite(name) for name in suite_names]
+
+    flat_final_output = run_dir / "final_output.json"
+    if flat_final_output.exists() and len(suites) > 1:
+        all_nested_exist = all((run_dir / suite["batch_id"] / "final_output.json").exists() for suite in suites)
+        if not all_nested_exist:
+            raise ValueError(
+                "Flat run_dir only contains a single final_output.json, so multi-suite compare would reuse the same result for every suite. "
+                "Please pass --suite for a single batch, or provide per-batch outputs under runs/<run_id>/<batch_id>/final_output.json."
+            )
+
     results_root = PROJECT_ROOT / config["results_root"]
     tag = args.tag or run_dir.name or timestamp_tag()
     results_dir = results_root / tag
@@ -73,8 +84,7 @@ def main() -> None:
 
     batch_reports: List[Dict[str, Any]] = []
 
-    for suite_name in suite_names:
-        suite = discover_suite(suite_name)
+    for suite_name, suite in zip(suite_names, suites):
         batch_input, human_labels, expected_summary, final_output, source_paths = load_batch_payload(suite, run_dir)
         routing_error_count = detect_routing_error(batch_input, suite["expected_template"])
         comparison = compare_batch(human_labels, final_output, expected_summary, routing_error_count)

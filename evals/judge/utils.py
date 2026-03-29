@@ -237,13 +237,13 @@ def discover_suite(name: str) -> Dict[str, Any]:
 
 
 def _resolve_final_output_path(run_dir: Path, batch_id: str) -> Path:
-    direct_path = run_dir / "final_output.json"
     nested_path = run_dir / batch_id / "final_output.json"
+    direct_path = run_dir / "final_output.json"
 
-    if direct_path.exists():
-        return direct_path
     if nested_path.exists():
         return nested_path
+    if direct_path.exists():
+        return direct_path
 
     raise FileNotFoundError(
         "final_output.json not found. Checked: "
