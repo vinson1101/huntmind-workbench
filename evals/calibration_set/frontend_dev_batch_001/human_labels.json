@@ -1,0 +1,13 @@
+[
+  {
+    "candidate_id": "frontend_001",
+    "should_contact": true,
+    "priority": "A",
+    "decision": "yes",
+    "match_fit": "high",
+    "recruitability": "high",
+    "mismatch_type": "none",
+    "primary_reason": "fit_and_reachable",
+    "comment": "前端开发样本"
+  }
+]

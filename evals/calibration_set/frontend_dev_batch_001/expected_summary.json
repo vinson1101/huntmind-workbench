@@ -1,0 +1,9 @@
+{
+  "expected_top_contact_ids": [
+    "frontend_001"
+  ],
+  "expected_no_contact_ids": [],
+  "risk_focus": [
+    "前端开发不应误路由到 product"
+  ]
+}

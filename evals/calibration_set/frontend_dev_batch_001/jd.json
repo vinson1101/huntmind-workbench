@@ -1,0 +1,22 @@
+{
+  "title": "前端开发工程师",
+  "must_have": [
+    "React",
+    "TypeScript",
+    "前端工程化"
+  ],
+  "nice_to_have": [
+    "性能优化"
+  ],
+  "salary_range": "25-35K",
+  "base_location": "上海",
+  "seniority_level": "mid",
+  "language_requirements": [],
+  "eligibility_constraints": [],
+  "travel_or_relocation": "",
+  "domain_tags": [
+    "frontend",
+    "web"
+  ],
+  "company_context": ""
+}
