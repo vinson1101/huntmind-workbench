@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -14,21 +13,21 @@ from .utils import (
     discover_suite,
     load_batch_payload,
     load_json,
-    run_batch_through_runner,
     timestamp_tag,
     write_json,
 )
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run fixed HuntMind evaluation judge.")
+    parser = argparse.ArgumentParser(description="Compare one real HuntMind run against human labels.")
     parser.add_argument("--config", required=True, help="Path to judge config JSON")
+    parser.add_argument("--run-dir", required=True, help="Path to a real run directory, e.g. runs/<run_id>")
     parser.add_argument("--tag", default="", help="Optional results tag")
     parser.add_argument(
         "--suite",
         nargs="+",
         default=[],
-        help="Optional suite override, e.g. --suite frontend_dev",
+        help="Optional suite override, e.g. --suite product",
     )
     return parser.parse_args()
 
@@ -60,9 +59,15 @@ def main() -> None:
         config_path = PROJECT_ROOT / config_path
     config = load_json(config_path)
 
+    run_dir = Path(args.run_dir)
+    if not run_dir.is_absolute():
+        run_dir = PROJECT_ROOT / run_dir
+    if not run_dir.exists():
+        raise FileNotFoundError(f"Run directory not found: {run_dir}")
+
     suite_names = args.suite or config["suite_names"]
     results_root = PROJECT_ROOT / config["results_root"]
-    tag = args.tag or timestamp_tag()
+    tag = args.tag or run_dir.name or timestamp_tag()
     results_dir = results_root / tag
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -70,8 +75,7 @@ def main() -> None:
 
     for suite_name in suite_names:
         suite = discover_suite(suite_name)
-        batch_input, model_output_text, human_labels, expected_summary = load_batch_payload(suite)
-        final_output = run_batch_through_runner(batch_input, model_output_text)
+        batch_input, human_labels, expected_summary, final_output, source_paths = load_batch_payload(suite, run_dir)
         routing_error_count = detect_routing_error(batch_input, suite["expected_template"])
         comparison = compare_batch(human_labels, final_output, expected_summary, routing_error_count)
         summary = _build_summary_record(
@@ -79,12 +83,11 @@ def main() -> None:
             suite_name,
             comparison,
             config["score_weights"],
-            suite.get("source_paths"),
+            source_paths,
         )
 
         batch_dir = results_dir / suite["batch_id"]
         batch_dir.mkdir(parents=True, exist_ok=True)
-        write_json(batch_dir / "final_output.json", final_output)
         write_json(batch_dir / "compare.json", {
             "batch_id": suite["batch_id"],
             "suite_name": suite_name,
@@ -96,6 +99,7 @@ def main() -> None:
     aggregated = aggregate_metric_rows(batch_reports, config["score_weights"])
     report = {
         "tag": tag,
+        "run_dir": str(run_dir),
         "config": {
             **config,
             "suite_names": suite_names,
@@ -108,7 +112,7 @@ def main() -> None:
     }
     write_json(results_dir / "report.json", report)
 
-    print(f"Ran {len(batch_reports)} batches")
+    print(f"Compared {len(batch_reports)} batches")
     print(f"score={aggregated['score']:.4f}")
     print(f"contact_accuracy={aggregated['contact_accuracy']:.4f}")
     print(f"top3_hit_rate={aggregated['top3_hit_rate']:.4f}")
